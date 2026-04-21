@@ -6,7 +6,7 @@ on:
       quality:
         description: "Render quality"
         required: false
-        default: "high"
+        default: "standard"
         type: choice
         options: [draft, standard, high]
       format:
@@ -26,26 +26,29 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install FFmpeg
-        run: sudo apt-get install -y ffmpeg
-
-      - name: Install Chromium dependencies
+      - name: Install system dependencies
         run: |
+          sudo apt-get update
           sudo apt-get install -y \
-            libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
-            libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 \
-            libxfixes3 libxrandr2 libgbm1 libasound2
+            ffmpeg \
+            libnss3 libatk1.0-0 libatk-bridge2.0-0 \
+            libcups2 libdrm2 libxkbcommon0 \
+            libxcomposite1 libxdamage1 libxfixes3 \
+            libxrandr2 libgbm1 libpango-1.0-0 \
+            libcairo2 libasound2t64 xvfb
 
       - name: Render video
         run: |
-          npx --yes hyperframes render \
+          mkdir -p renders
+          xvfb-run --auto-servernum npx --yes hyperframes render \
             --quality ${{ inputs.quality }} \
             --format ${{ inputs.format }} \
-            --out dist/portfolio-reel.${{ inputs.format }}
+            --output renders/portfolio-reel.${{ inputs.format }} \
+            --workers 1
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: portfolio-reel-${{ inputs.quality }}
-          path: dist/
+          path: renders/
           retention-days: 7
