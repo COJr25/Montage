@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Portfolio Reel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; }
+  </style>
+</head>
+<body>
+
+<div
+  data-composition-id="portfolio-reel"
+  data-start="0"
+  data-duration="30"
+  data-width="1080"
+  data-height="1920"
+  style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#080808;"
+>
+  <style>
+    [data-composition-id="portfolio-reel"] {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Shared scene layout */
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100%;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+
+    /* Browser mockup */
+    .browser-frame {
+      width: 1040px;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow:
+        0 40px 120px rgba(0,0,0,0.9),
+        0 0 0 1px rgba(255,255,255,0.07);
+    }
+    .browser-chrome {
+      background: #181818;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .url-bar {
+      flex: 1;
+      background: #252525;
+      border-radius: 6px;
+      padding: 7px 14px;
+      margin-left: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: #555;
+      letter-spacing: 0.01em;
+    }
+    .screenshot-wrap {
+      position: relative;
+      overflow: hidden;
+      width: 1040px;
+      height: 585px;
+    }
+    .screenshot-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transform-origin: center top;
+    }
+
+    /* Site info block */
+    .site-info {
+      align-self: flex-start;
+      padding-left: 20px;
+      margin-top: 36px;
+    }
+    .site-category {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.38em;
+      color: #6b6560;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .site-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 80px;
+      line-height: 0.88;
+      color: #f0ece6;
+      letter-spacing: 0.02em;
+    }
+    .gold-bar {
+      width: 52px;
+      height: 2px;
+      background: #c4a35a;
+      margin-top: 22px;
+    }
+    .scene-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.55em;
+      color: #c4a35a;
+      align-self: flex-start;
+      padding-left: 20px;
+      margin-bottom: 24px;
+    }
+  </style>
+
+  <!-- ── AMBIENT BACKGROUND (persistent) ── -->
+  <div id="glow-tr" style="position:absolute;top:-350px;right:-350px;width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(196,163,90,0.07) 0%,transparent 65%);pointer-events:none;z-index:1;"></div>
+  <div id="glow-bl" style="position:absolute;bottom:-350px;left:-250px;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(196,163,90,0.05) 0%,transparent 65%);pointer-events:none;z-index:1;"></div>
+  <div id="ghost" style="position:absolute;bottom:60px;right:-30px;font-family:'Bebas Neue',sans-serif;font-size:380px;color:rgba(196,163,90,0.025);line-height:1;pointer-events:none;z-index:1;user-select:none;">WEB</div>
+
+  <!-- ── SCENE: INTRO (0 – 3.5s) ── -->
+  <div
+    id="scene-intro"
+    data-start="0"
+    data-duration="3.5"
+    data-track-index="2"
+    class="scene clip"
+    style="padding:80px;z-index:10;"
+  >
+    <div id="i-tag"     style="font-family:'Inter',sans-serif;font-size:12px;font-weight:400;letter-spacing:0.42em;color:#c4a35a;text-transform:uppercase;margin-bottom:44px;align-self:center;">PORTFOLIO · 2026</div>
+    <div id="i-line1"   style="font-family:'Bebas Neue',sans-serif;font-size:168px;line-height:0.84;color:#f0ece6;align-self:stretch;text-align:center;">WE</div>
+    <div id="i-line2"   style="font-family:'Bebas Neue',sans-serif;font-size:168px;line-height:0.84;color:#f0ece6;align-self:stretch;text-align:center;">BUILD</div>
+    <div id="i-acc1"    style="font-family:'Bebas Neue',sans-serif;font-size:92px;line-height:0.95;color:#c4a35a;align-self:stretch;text-align:center;margin-top:16px;">PREMIUM</div>
+    <div id="i-acc2"    style="font-family:'Bebas Neue',sans-serif;font-size:92px;line-height:0.95;color:#c4a35a;align-self:stretch;text-align:center;">WEBSITES</div>
+    <div id="i-sep"     style="width:60px;height:1px;background:rgba(196,163,90,0.45);margin:52px auto;"></div>
+    <div id="i-sub"     style="font-family:'Inter',sans-serif;font-size:13px;font-weight:300;letter-spacing:0.28em;color:#4a4a4a;text-transform:uppercase;text-align:center;">3 projects from our catalog</div>
+  </div>
+
+  <!-- ── SCENE 1: LUNARIX ONE (3.5 – 12.5s) ── -->
+  <div
+    id="scene-s1"
+    data-start="3.5"
+    data-duration="9"
+    data-track-index="2"
+    class="scene clip"
+    style="z-index:10;"
+  >
+    <div id="s1-num" class="scene-num">01 — 03</div>
+
+    <div id="s1-frame" class="browser-frame">
+      <div class="browser-chrome">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <div class="url-bar">cojr25.github.io</div>
+      </div>
+      <div class="screenshot-wrap">
+        <img id="s1-img" src="assets/Lunarix.jpg" alt="" />
+      </div>
+    </div>
+
+    <div id="s1-info" class="site-info">
+      <div class="site-category">Wellness · E-Commerce</div>
+      <div class="site-name">LUNARIX<br>ONE</div>
+      <div class="gold-bar"></div>
+    </div>
+  </div>
+
+  <!-- ── SCENE 2: MOMENTUM (12.5 – 21.5s) ── -->
+  <div
+    id="scene-s2"
+    data-start="12.5"
+    data-duration="9"
+    data-track-index="2"
+    class="scene clip"
+    style="z-index:10;"
+  >
+    <div id="s2-num" class="scene-num">02 — 03</div>
+
+    <div id="s2-frame" class="browser-frame">
+      <div class="browser-chrome">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <div class="url-bar">momentum.app</div>
+      </div>
+      <div class="screenshot-wrap">
+        <img id="s2-img" src="assets/MOMENTUM,.jpg" alt="" />
+      </div>
+    </div>
+
+    <div id="s2-info" class="site-info">
+      <div class="site-category">SaaS · Platform</div>
+      <div class="site-name">MOMENTUM<br>SUSTAINED</div>
+      <div class="gold-bar"></div>
+    </div>
+  </div>
+
+  <!-- ── SCENE 3: RONIN + OUTRO (21.5 – 30s) ── -->
+  <div
+    id="scene-s3"
+    data-start="21.5"
+    data-duration="8.5"
+    data-track-index="2"
+    class="scene clip"
+    style="z-index:10;"
+  >
+    <div id="s3-num" class="scene-num">03 — 03</div>
+
+    <div id="s3-frame" class="browser-frame">
+      <div class="browser-chrome">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <div class="url-bar">thelastronin.io</div>
+      </div>
+      <div class="screenshot-wrap">
+        <img id="s3-img" src="assets/RONIN.jpg" alt="" />
+      </div>
+    </div>
+
+    <div id="s3-info" class="site-info">
+      <div class="site-category">Entertainment · Media</div>
+      <div class="site-name">THE LAST<br>RONIN</div>
+      <div class="gold-bar"></div>
+    </div>
+
+    <!-- OUTRO — fades in over site 3 content at t≈27.5 -->
+    <div
+      id="outro"
+      style="position:absolute;inset:0;background:#080808;opacity:0;z-index:20;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px;"
+    >
+      <div id="o-tag"   style="font-family:'Inter',sans-serif;font-size:12px;font-weight:400;letter-spacing:0.42em;color:#c4a35a;text-transform:uppercase;margin-bottom:52px;">LET'S WORK TOGETHER</div>
+      <div id="o-line1" style="font-family:'Bebas Neue',sans-serif;font-size:136px;line-height:0.86;color:#f0ece6;text-align:center;align-self:stretch;">YOUR</div>
+      <div id="o-line2" style="font-family:'Bebas Neue',sans-serif;font-size:136px;line-height:0.86;color:#f0ece6;text-align:center;align-self:stretch;">PROJECT</div>
+      <div id="o-line3" style="font-family:'Bebas Neue',sans-serif;font-size:136px;line-height:0.86;color:#c4a35a;text-align:center;align-self:stretch;">NEXT.</div>
+      <div id="o-sep"   style="width:60px;height:1px;background:rgba(196,163,90,0.4);margin:56px auto;transform-origin:left center;"></div>
+      <div id="o-cta"   style="font-family:'Inter',sans-serif;font-size:14px;font-weight:300;letter-spacing:0.28em;color:#5a5652;text-transform:uppercase;">yourportfolio.com</div>
+    </div>
+  </div>
+
+  <!-- Transition flash overlay (on top of everything) -->
+  <div id="flash" style="position:absolute;inset:0;background:#080808;opacity:0;pointer-events:none;z-index:100;"></div>
+
+  <script>
+    window.__timelines = window.__timelines || {};
+    const tl = gsap.timeline({ paused: true });
+
+    // ── AMBIENT (full duration) ──
+    tl.to("#glow-tr", { scale: 1.35, duration: 7,  ease: "sine.inOut", yoyo: true, repeat: Math.floor(30/14)-1 }, 0);
+    tl.to("#glow-bl", { scale: 1.25, duration: 9,  ease: "sine.inOut", yoyo: true, repeat: Math.floor(30/18)-1 }, 2.5);
+    tl.to("#ghost",   { x: -50,      duration: 28, ease: "none" }, 0);
+
+    // ── INTRO (t=0) ──
+    tl.from("#i-tag",   { opacity: 0, y: 18, duration: 0.6,  ease: "power2.out" },  0.15);
+    tl.from("#i-line1", { opacity: 0, y: 90, duration: 0.55, ease: "expo.out"   },  0.45);
+    tl.from("#i-line2", { opacity: 0, y: 90, duration: 0.55, ease: "expo.out"   },  0.62);
+    tl.from("#i-acc1",  { opacity: 0, y: 55, duration: 0.5,  ease: "power3.out" },  0.88);
+    tl.from("#i-acc2",  { opacity: 0, y: 55, duration: 0.5,  ease: "power3.out" },  1.0);
+    tl.from("#i-sep",   { scaleX: 0, transformOrigin: "center center", duration: 0.5, ease: "power2.out" }, 1.25);
+    tl.from("#i-sub",   { opacity: 0, duration: 0.5, ease: "power2.out" }, 1.45);
+
+    // ── FLASH: intro → site1 (t=3.5) ──
+    tl.to("#flash", { opacity: 1, duration: 0.15, ease: "none" }, 3.28);
+    tl.to("#flash", { opacity: 0, duration: 0.2,  ease: "none" }, 3.43);
+
+    // ── SITE 1 (t=3.5) ──
+    tl.from("#scene-s1", { opacity: 0, y: 30, duration: 0.5,  ease: "power3.out" }, 3.5);
+    tl.from("#s1-num",   { opacity: 0, x: -20, duration: 0.45, ease: "power3.out" }, 3.75);
+    tl.from("#s1-frame", { opacity: 0, y: 55, duration: 0.65, ease: "power3.out" }, 3.95);
+    tl.from("#s1-info",  { opacity: 0, y: 28, duration: 0.55, ease: "power2.out" }, 4.45);
+    tl.to(  "#s1-img",   { scale: 1.05, duration: 9, ease: "none" }, 3.5);
+
+    // ── FLASH: site1 → site2 (t=12.5) ──
+    tl.to("#flash", { opacity: 1, duration: 0.15, ease: "none" }, 12.28);
+    tl.to("#flash", { opacity: 0, duration: 0.2,  ease: "none" }, 12.43);
+
+    // ── SITE 2 (t=12.5) ──
+    tl.from("#scene-s2", { opacity: 0, y: 30, duration: 0.5,  ease: "power3.out" }, 12.5);
+    tl.from("#s2-num",   { opacity: 0, x: -20, duration: 0.45, ease: "power3.out" }, 12.75);
+    tl.from("#s2-frame", { opacity: 0, y: 55, duration: 0.65, ease: "power3.out" }, 12.95);
+    tl.from("#s2-info",  { opacity: 0, y: 28, duration: 0.55, ease: "power2.out" }, 13.45);
+    tl.to(  "#s2-img",   { scale: 1.05, duration: 9, ease: "none" }, 12.5);
+
+    // ── FLASH: site2 → site3 (t=21.5) ──
+    tl.to("#flash", { opacity: 1, duration: 0.15, ease: "none" }, 21.28);
+    tl.to("#flash", { opacity: 0, duration: 0.2,  ease: "none" }, 21.43);
+
+    // ── SITE 3 (t=21.5) ──
+    tl.from("#scene-s3", { opacity: 0, y: 30, duration: 0.5,  ease: "power3.out" }, 21.5);
+    tl.from("#s3-num",   { opacity: 0, x: -20, duration: 0.45, ease: "power3.out" }, 21.75);
+    tl.from("#s3-frame", { opacity: 0, y: 55, duration: 0.65, ease: "power3.out" }, 21.95);
+    tl.from("#s3-info",  { opacity: 0, y: 28, duration: 0.55, ease: "power2.out" }, 22.45);
+    tl.to(  "#s3-img",   { scale: 1.05, duration: 8.5, ease: "none" }, 21.5);
+
+    // ── SITE 3 EXIT → OUTRO (final scene, exits allowed) ──
+    tl.to("#s3-num",   { opacity: 0, duration: 0.35, ease: "power2.in" }, 26.8);
+    tl.to("#s3-frame", { opacity: 0, y: -24, duration: 0.45, ease: "power2.in" }, 26.8);
+    tl.to("#s3-info",  { opacity: 0, duration: 0.35, ease: "power2.in" }, 26.8);
+
+    tl.to(  "#outro",   { opacity: 1, duration: 0.5, ease: "power2.out" }, 27.3);
+    tl.from("#o-tag",   { opacity: 0, y: 18, duration: 0.5,  ease: "power2.out"  }, 27.55);
+    tl.from("#o-line1", { opacity: 0, y: 60, duration: 0.55, ease: "expo.out"    }, 27.75);
+    tl.from("#o-line2", { opacity: 0, y: 60, duration: 0.55, ease: "expo.out"    }, 27.92);
+    tl.from("#o-line3", { opacity: 0, y: 60, duration: 0.55, ease: "expo.out"    }, 28.1);
+    tl.from("#o-sep",   { scaleX: 0, transformOrigin: "center center", duration: 0.5, ease: "power2.out" }, 28.4);
+    tl.from("#o-cta",   { opacity: 0, y: 14, duration: 0.5,  ease: "power2.out"  }, 28.65);
+
+    // Final fade to black
+    tl.to("#scene-s3", { opacity: 0, duration: 0.9, ease: "power2.in" }, 29.1);
+
+    window.__timelines["portfolio-reel"] = tl;
+  </script>
+</div>
+
+</body>
+</html>
