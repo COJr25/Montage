@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Bento Grid</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #b8b8b8; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+    #__bundler_loading { position: fixed; bottom: 20px; right: 20px; font: 13px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; color: #666; background: #fff; padding: 8px 14px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.12); z-index: 10000; }
+    #__bundler_thumbnail { position: fixed; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #b8b8b8; z-index: 9999; }
+    #__bundler_thumbnail svg { width: 100%; height: 100%; object-fit: contain; }
+    #__bundler_placeholder { color: #999; font-size: 14px; }
+  </style>
+  <noscript>
+    <style>#__bundler_loading { display: none; }</style>
+    <div style="position:fixed;bottom:12px;left:12px;font:13px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#999;background:rgba(255,255,255,0.9);padding:6px 12px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.08);z-index:10000;">
+      This page requires JavaScript to display.
+    </div>
+  </noscript>
+</head>
+<body>
+  <div id="__bundler_thumbnail">
+  <svg viewBox="0 0 390 700" xmlns="http://www.w3.org/2000/svg">
+    <rect width="390" height="700" fill="#b8b8b8"></rect>
+    <!-- Map card -->
+    <rect x="16" y="16" width="220" height="200" rx="28" fill="#f0f0f0"></rect>
+    <!-- Flight card -->
+    <rect x="246" y="16" width="128" height="118" rx="28" fill="#1c1c1e"></rect>
+    <!-- Call card -->
+    <rect x="246" y="144" width="128" height="72" rx="28" fill="#f0f0f0"></rect>
+    <!-- Mercedes card -->
+    <rect x="16" y="226" width="358" height="100" rx="28" fill="#0d2010"></rect>
+    <rect x="16" y="226" width="358" height="100" rx="28" fill="none" stroke="#3dff5c" stroke-width="2" opacity="0.5"></rect>
+    <!-- Clock -->
+    <rect x="16" y="336" width="128" height="128" rx="28" fill="#f0f0f0"></rect>
+    <circle cx="80" cy="400" r="42" fill="#e8e8e8"></circle>
+    <!-- Battery -->
+    <rect x="16" y="474" width="128" height="90" rx="28" fill="#f0f0f0"></rect>
+    <!-- Calendar -->
+    <rect x="154" y="336" width="220" height="228" rx="28" fill="#1c1c1e"></rect>
+    <!-- Calendar dots -->
+    <circle cx="330" cy="430" r="9" fill="#b5e61d"></circle>
+    <circle cx="307" cy="454" r="9" fill="#e02020"></circle>
+    <circle cx="283" cy="454" r="9" fill="#b5e61d"></circle>
+  </svg>
+</div>
+  <div id="__bundler_loading">Unpacking...</div>
+
+  <script>
+    
+document.addEventListener('DOMContentLoaded', async function() {
+  const loading = document.getElementById('__bundler_loading');
+  function setStatus(msg) { if (loading) loading.textContent = msg; }
+
+  // Error sink persists across replaceWith since it's on window, not the DOM.
+  window.addEventListener('error', function(e) {
+    var p = document.body || document.documentElement;
+    var d = document.getElementById('__bundler_err') || p.appendChild(document.createElement('div'));
+    d.id = '__bundler_err';
+    d.style.cssText = 'position:fixed;bottom:12px;left:12px;right:12px;font:12px/1.4 ui-monospace,monospace;background:#2a1215;color:#ff8a80;padding:10px 14px;border-radius:8px;border:1px solid #5c2b2e;z-index:99999;white-space:pre-wrap;max-height:40vh;overflow:auto';
+    d.textContent = (d.textContent ? d.textContent + String.fromCharCode(10) : '') +
+      '[bundle] ' + (e.message || e.type) +
+      (e.filename ? ' (' + e.filename.slice(0, 60) + ':' + e.lineno + ')' : '');
+  }, true);
+
+  try {
+    const manifestEl = document.querySelector('script[type="__bundler/manifest"]');
+    const templateEl = document.querySelector('script[type="__bundler/template"]');
+    if (!manifestEl || !templateEl) {
+      setStatus('Error: missing bundle data');
+      console.error('[bundler] Missing script tags — manifestEl:', !!manifestEl, 'templateEl:', !!templateEl);
+      return;
+    }
+
+    const manifest = JSON.parse(manifestEl.textContent);
+    let template = JSON.parse(templateEl.textContent);
+
+    const uuids = Object.keys(manifest);
+    setStatus('Unpacking ' + uuids.length + ' assets...');
+
+    const blobUrls = {};
+    await Promise.all(uuids.map(async (uuid) => {
+      const entry = manifest[uuid];
+      try {
+        const binaryStr = atob(entry.data);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+
+        let finalBytes = bytes;
+        if (entry.compressed) {
+          if (typeof DecompressionStream !== 'undefined') {
+            const ds = new DecompressionStream('gzip');
+            const writer = ds.writable.getWriter();
+            const reader = ds.readable.getReader();
+            writer.write(bytes);
+            writer.close();
+            const chunks = [];
+            let totalLen = 0;
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              chunks.push(value);
+              totalLen += value.length;
+            }
+            finalBytes = new Uint8Array(totalLen);
+            let offset = 0;
+            for (const chunk of chunks) { finalBytes.set(chunk, offset); offset += chunk.length; }
+          } else {
+            console.warn('DecompressionStream not available, asset ' + uuid + ' may not render');
+          }
+        }
+
+        blobUrls[uuid] = URL.createObjectURL(new Blob([finalBytes], { type: entry.mime }));
+      } catch (err) {
+        console.error('Failed to decode asset ' + uuid + ':', err);
+        blobUrls[uuid] = URL.createObjectURL(new Blob([], { type: entry.mime }));
+      }
+    }));
+
+    const extResEl = document.querySelector('script[type="__bundler/ext_resources"]');
+    const extResources = extResEl ? JSON.parse(extResEl.textContent) : [];
+    const resourceMap = {};
+    for (const entry of extResources) {
+      if (blobUrls[entry.uuid]) resourceMap[entry.id] = blobUrls[entry.uuid];
+    }
+
+    setStatus('Rendering...');
+    for (const uuid of uuids) template = template.split(uuid).join(blobUrls[uuid]);
+
+    // Strip integrity + crossorigin — blob URLs from a file:// document inherit
+    // a null origin, so crossorigin forces a CORS fetch that SRI then rejects.
+    // The manifest bytes are ours; SRI protects against CDN compromise, not this.
+    template = template.replace(/\s+integrity="[^"]*"/gi, '').replace(/\s+crossorigin="[^"]*"/gi, '');
+
+    const resourceScript = '<script>window.__resources = ' +
+      JSON.stringify(resourceMap).split('</' + 'script>').join('<\\/' + 'script>') +
+      ';</' + 'script>';
+    // Inject after <head> so the DOCTYPE stays first; prepending the script
+    // would push the parser into quirks mode. DOMParser always emits a <head>
+    // (synthesizing one if the source HTML omitted it) but may carry
+    // attributes through, so match the full opening tag. slice() rather than
+    // replace() keeps us clear of $-pattern substitution in resourceScript.
+    const headOpen = template.match(/<head[^>]*>/i);
+    if (headOpen) {
+      const i = headOpen.index + headOpen[0].length;
+      template = template.slice(0, i) + resourceScript + template.slice(i);
+    }
+
+    // Parse the template and swap the root element. Scripts inserted via
+    // DOMParser/replaceWith are inert per spec — re-create each with
+    // createElement so they execute, awaiting onload for src scripts to
+    // preserve ordering (React before ReactDOM before Babel before text/babel).
+    const doc = new DOMParser().parseFromString(template, 'text/html');
+    document.documentElement.replaceWith(doc.documentElement);
+    const dead = Array.from(document.scripts);
+    for (const old of dead) {
+      const s = document.createElement('script');
+      for (const a of old.attributes) s.setAttribute(a.name, a.value);
+      s.textContent = old.textContent;
+      // text/babel scripts with a src: fetch and inline. transformScriptTags
+      // does XHR against the src, but blob:null/ from a file:// origin is
+      // silently dropped. Inlining makes it a plain inline babel script,
+      // which transformScriptTags handles unconditionally.
+      if ((s.type === 'text/babel' || s.type === 'text/jsx') && s.src) {
+        const r = await fetch(s.src);
+        s.textContent = await r.text();
+        s.removeAttribute('src');
+      }
+      const p = s.src ? new Promise(function(r) { s.onload = s.onerror = r; }) : null;
+      old.replaceWith(s);
+      if (p) await p;
+    }
+    // Babel standalone auto-transforms type=text/babel on DOMContentLoaded,
+    // which fired before we swapped the document. Trigger manually if present.
+    if (window.Babel && typeof window.Babel.transformScriptTags === 'function') {
+      window.Babel.transformScriptTags();
+    }
+  } catch (err) {
+    setStatus('Error unpacking: ' + err.message);
+    console.error('Bundle unpack error:', err);
+  }
+});
+
+  </script>
+
+  <script type="__bundler/manifest">
+{}
+  </script>
+
+  <script type="__bundler/ext_resources">
+[]
+  </script>
+
+  <script type="__bundler/template">
+"<!DOCTYPE html>\n<html lang=\"en\"><head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n<title>Bento Grid<\u002Ftitle>\n\n<style>\n  * { margin: 0; padding: 0; box-sizing: border-box; }\n\n  body {\n    min-height: 100vh;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    background: radial-gradient(ellipse at 50% 40%, #d8d8d8 0%, #b0b0b0 55%, #909090 100%);\n    font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;\n  }\n\n  .bento {\n    width: 390px;\n    padding: 16px;\n    display: flex;\n    flex-direction: column;\n    gap: 10px;\n  }\n\n  /* ── shared card base ── */\n  .card {\n    border-radius: 28px;\n    overflow: hidden;\n    position: relative;\n  }\n  .card-white {\n    background: #f0f0f0;\n    box-shadow: 0 4px 24px rgba(0,0,0,0.13), 0 1px 3px rgba(0,0,0,0.08);\n  }\n  .card-dark {\n    background: #1c1c1e;\n    box-shadow: 0 4px 24px rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.15);\n  }\n\n  /* ══════════════════════════════\n     ROW 1 — Map + (Flight / Call)\n  ══════════════════════════════ */\n  .row1 {\n    display: grid;\n    grid-template-columns: 1fr 152px;\n    gap: 10px;\n    align-items: stretch;\n  }\n\n  /* MAP */\n  .map-card {\n    display: flex;\n    flex-direction: column;\n    min-height: 320px;\n  }\n  .map-header {\n    padding: 10px 12px 8px;\n    display: flex;\n    flex-direction: column;\n    gap: 2px;\n  }\n  .map-header-row {\n    display: flex;\n    align-items: center;\n    gap: 5px;\n  }\n  .map-header-row svg { flex-shrink: 0; }\n  .map-dest {\n    font-size: 11.5px;\n    font-weight: 600;\n    color: #1c1c1e;\n  }\n  .map-eta {\n    font-size: 10px;\n    color: #666;\n    margin-left: 18px;\n  }\n  .map-area {\n    flex: 1;\n    position: relative;\n    overflow: hidden;\n    background: #e8e8e8;\n  }\n  .map-svg {\n    width: 100%; height: 100%;\n    position: absolute; top: 0; left: 0;\n  }\n  .map-footer {\n    padding: 8px;\n    display: flex;\n    gap: 8px;\n  }\n  .nav-step {\n    flex: 1;\n    background: rgba(0,0,0,0.85);\n    border-radius: 14px;\n    padding: 7px 9px;\n    display: flex;\n    align-items: center;\n    gap: 6px;\n  }\n  .nav-step svg { flex-shrink: 0; }\n  .nav-step-info { display: flex; flex-direction: column; }\n  .nav-step-dist {\n    font-size: 12px;\n    font-weight: 700;\n    color: #fff;\n  }\n  .nav-step-label {\n    font-size: 9px;\n    color: #aaa;\n    line-height: 1.2;\n  }\n\n  /* RIGHT COLUMN */\n  .col-right {\n    display: flex;\n    flex-direction: column;\n    gap: 10px;\n  }\n\n  /* NEXT FLIGHT */\n  .flight-card {\n    flex: 1;\n    padding: 14px 14px 12px;\n    display: flex;\n    flex-direction: column;\n  }\n  .flight-title {\n    font-size: 12px;\n    font-weight: 600;\n    color: #999;\n    margin-bottom: 10px;\n  }\n  .flight-route {\n    display: flex;\n    flex-direction: column;\n    gap: 0;\n    flex: 1;\n    position: relative;\n  }\n  .flight-stop {\n    display: flex;\n    align-items: flex-start;\n    gap: 8px;\n  }\n  .flight-dot-col {\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    padding-top: 3px;\n  }\n  .flight-dot {\n    width: 7px; height: 7px;\n    border-radius: 50%;\n    background: #fff;\n    flex-shrink: 0;\n  }\n  .flight-line {\n    width: 1px;\n    height: 18px;\n    background: repeating-linear-gradient(to bottom, #555 0px, #555 3px, transparent 3px, transparent 6px);\n    margin: 2px 0;\n  }\n  .flight-city {\n    font-size: 13.5px;\n    font-weight: 700;\n    color: #fff;\n    line-height: 1.1;\n  }\n  .flight-date {\n    font-size: 10px;\n    color: #777;\n  }\n  .flight-icon {\n    position: absolute;\n    right: 0;\n    bottom: 0;\n  }\n\n  /* MOM CALL */\n  .call-card {\n    padding: 12px 14px;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n    gap: 8px;\n  }\n  .call-name {\n    font-size: 15px;\n    font-weight: 600;\n    color: #1c1c1e;\n    text-align: center;\n  }\n  .call-time {\n    font-size: 13px;\n    color: #555;\n    text-align: center;\n    margin-top: -4px;\n  }\n  .call-btns {\n    display: flex;\n    align-items: center;\n    gap: 10px;\n    margin-top: 2px;\n  }\n  .call-btn {\n    width: 34px; height: 34px;\n    border-radius: 50%;\n    display: flex; align-items: center; justify-content: center;\n    background: #e0e0e0;\n  }\n  .call-btn-red {\n    background: #e8392a;\n    width: 38px; height: 38px;\n  }\n\n  /* ══════════════════════════════\n     ROW 2 — Mercedes Charging\n  ══════════════════════════════ */\n  .mercedes-card {\n    padding: 14px 18px 14px;\n    background: linear-gradient(135deg, #0d2010 0%, #1a3d1a 30%, #0d2010 70%, #0a1a0a 100%);\n    position: relative;\n    overflow: hidden;\n    min-height: 130px;\n    display: flex;\n    flex-direction: column;\n    justify-content: space-between;\n  }\n  .mercedes-glow {\n    position: absolute;\n    top: 0; left: 0; right: 0; bottom: 0;\n    background: radial-gradient(ellipse at 30% 60%, rgba(0,200,50,0.18) 0%, transparent 65%);\n    pointer-events: none;\n  }\n  .mercedes-top {\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n  }\n  .mercedes-name {\n    font-size: 18px;\n    font-weight: 700;\n    color: #fff;\n  }\n  .mercedes-charge-status {\n    display: flex;\n    align-items: center;\n    gap: 5px;\n    font-size: 12px;\n    color: #4cff6c;\n    font-weight: 600;\n  }\n  .mercedes-middle {\n    display: flex;\n    align-items: flex-end;\n    justify-content: space-between;\n  }\n  .mercedes-pct {\n    font-size: 52px;\n    font-weight: 800;\n    color: #fff;\n    line-height: 1;\n    display: flex;\n    align-items: flex-start;\n    gap: 2px;\n  }\n  .mercedes-pct-sign {\n    font-size: 22px;\n    font-weight: 600;\n    color: #ccc;\n    margin-top: 10px;\n  }\n  .mercedes-car {\n    width: 150px;\n    height: 80px;\n    flex-shrink: 0;\n  }\n  .mercedes-bottom {\n    display: flex;\n    flex-direction: column;\n    gap: 4px;\n  }\n  .mercedes-bar-wrap {\n    background: rgba(255,255,255,0.15);\n    border-radius: 4px;\n    height: 6px;\n    overflow: hidden;\n  }\n  .mercedes-bar-fill {\n    height: 100%;\n    background: #3dff5c;\n    border-radius: 4px;\n    width: 100%;\n  }\n  .mercedes-info-row {\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n  }\n  .mercedes-km {\n    font-size: 11px;\n    color: #5aff5a;\n    font-weight: 600;\n  }\n  .mercedes-kwh {\n    font-size: 10px;\n    color: #666;\n  }\n\n  /* ══════════════════════════════\n     ROW 3 — Clock/Battery + Calendar\n  ══════════════════════════════ */\n  .row3 {\n    display: grid;\n    grid-template-columns: 152px 1fr;\n    gap: 10px;\n    align-items: stretch;\n  }\n  .col-left {\n    display: flex;\n    flex-direction: column;\n    gap: 10px;\n  }\n\n  /* CLOCK */\n  .clock-card {\n    aspect-ratio: 1/1;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    padding: 10px;\n    background: #efefef;\n  }\n  .clock-face {\n    width: 110px; height: 110px;\n    position: relative;\n  }\n  .clock-circle {\n    width: 100%; height: 100%;\n    border-radius: 50%;\n    background: #e8e8e8;\n    border: 1px solid rgba(0,0,0,0.06);\n    position: relative;\n    box-shadow: inset 0 1px 4px rgba(0,0,0,0.1);\n  }\n  .clock-numeral {\n    position: absolute;\n    font-size: 10px;\n    font-weight: 600;\n    color: #444;\n    transform: translate(-50%, -50%);\n  }\n  .clock-tick {\n    position: absolute;\n    width: 1px;\n    height: 5px;\n    background: #bbb;\n    transform-origin: bottom center;\n    left: 50%; top: 5px;\n    margin-left: -0.5px;\n  }\n  .clock-center {\n    position: absolute;\n    width: 7px; height: 7px;\n    background: #e8392a;\n    border-radius: 50%;\n    top: 50%; left: 50%;\n    transform: translate(-50%, -50%);\n    z-index: 10;\n  }\n  .hand {\n    position: absolute;\n    bottom: 50%;\n    left: 50%;\n    transform-origin: bottom center;\n    border-radius: 99px;\n  }\n  .hand-hour {\n    width: 3px;\n    height: 30px;\n    background: #1c1c1e;\n    margin-left: -1.5px;\n    transform: rotate(0deg);\n  }\n  .hand-minute {\n    width: 2px;\n    height: 42px;\n    background: #1c1c1e;\n    margin-left: -1px;\n    transform: rotate(0deg);\n  }\n  .hand-second {\n    width: 1.5px;\n    height: 46px;\n    background: #e8392a;\n    margin-left: -0.75px;\n    transform: rotate(180deg);\n  }\n\n  /* BATTERY */\n  .battery-card {\n    flex: 1;\n    padding: 12px 14px;\n    display: flex;\n    flex-direction: column;\n    justify-content: space-between;\n  }\n  .battery-top {\n    display: flex;\n    align-items: center;\n    gap: 5px;\n  }\n  .battery-pct {\n    font-size: 22px;\n    font-weight: 700;\n    color: #1c1c1e;\n  }\n  .battery-bars {\n    display: flex;\n    align-items: flex-end;\n    gap: 4px;\n    height: 36px;\n    margin: 4px 0;\n  }\n  .battery-bar {\n    flex: 1;\n    border-radius: 5px;\n  }\n  .battery-bar.on { background: #d94c2b; }\n  .battery-bar.off { background: #ccc; }\n  .battery-eta {\n    font-size: 11px;\n    color: #888;\n    text-align: center;\n  }\n\n  /* DAILY ACTIVITY CALENDAR */\n  .calendar-card {\n    padding: 14px 14px 12px;\n    display: flex;\n    flex-direction: column;\n    gap: 8px;\n  }\n  .cal-header {\n    display: flex;\n    justify-content: space-between;\n    align-items: flex-start;\n  }\n  .cal-title {\n    font-size: 17px;\n    font-weight: 700;\n    color: #fff;\n    line-height: 1.2;\n  }\n  .cal-nav {\n    display: flex;\n    align-items: center;\n    gap: 5px;\n  }\n  .cal-nav-icon {\n    width: 24px; height: 24px;\n    background: #2c2c2e;\n    border-radius: 6px;\n    display: flex; align-items: center; justify-content: center;\n  }\n  .cal-month-pill {\n    background: #2c2c2e;\n    border-radius: 6px;\n    padding: 3px 7px;\n    font-size: 10px;\n    color: #ccc;\n    font-weight: 500;\n  }\n  .cal-today-pill {\n    background: #f0f0f0;\n    border-radius: 12px;\n    padding: 2px 10px;\n    font-size: 11px;\n    color: #1c1c1e;\n    font-weight: 600;\n    text-align: center;\n    align-self: center;\n    margin: 0 auto;\n    width: fit-content;\n  }\n  .cal-grid {\n    display: grid;\n    grid-template-columns: repeat(7, 1fr);\n    gap: 2px;\n  }\n  .cal-day {\n    aspect-ratio: 1/1;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    font-size: 11.5px;\n    color: #555;\n    border-radius: 50%;\n    font-weight: 500;\n  }\n  .cal-day.prev-month { color: #444; }\n  .cal-day.lime {\n    background: #b5e61d;\n    color: #1a2a00;\n    font-weight: 700;\n  }\n  .cal-day.lime-outline {\n    background: transparent;\n    border: 2px solid #b5e61d;\n    color: #b5e61d;\n    font-weight: 700;\n  }\n  .cal-day.red {\n    background: #e02020;\n    color: #fff;\n    font-weight: 700;\n  }\n  .cal-day.white-circle {\n    background: #f0f0f0;\n    color: #1c1c1e;\n    font-weight: 700;\n  }\n  .cal-day.outline {\n    border: 1.5px solid #555;\n    color: #888;\n  }\n  .cal-day.today-jul {\n    background: #f0f0f0;\n    color: #1c1c1e;\n    font-weight: 700;\n  }\n<\u002Fstyle>\n<\u002Fhead>\n<body>\n\n<div class=\"bento\">\n\n  <!-- ROW 1: Map + Flight/Call -->\n  <div class=\"row1\">\n\n    <!-- MAP -->\n    <div class=\"card card-white map-card\">\n      <div class=\"map-header\">\n        <div class=\"map-header-row\">\n          <svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\">\n            <circle cx=\"12\" cy=\"10\" r=\"4\" stroke=\"#1c1c1e\" stroke-width=\"2\"><\u002Fcircle>\n            <path d=\"M12 2C7.58 2 4 5.58 4 10c0 5.25 8 14 8 14s8-8.75 8-14c0-4.42-3.58-8-8-8z\" stroke=\"#1c1c1e\" stroke-width=\"2\" fill=\"none\"><\u002Fpath>\n          <\u002Fsvg>\n          <span class=\"map-dest\">Marie's House<\u002Fspan>\n        <\u002Fdiv>\n        <span class=\"map-eta\">Estimated arrival in 6 minutes<\u002Fspan>\n      <\u002Fdiv>\n\n      <!-- Map SVG area -->\n      <div class=\"map-area\">\n        <svg class=\"map-svg\" viewBox=\"0 0 230 200\" preserveAspectRatio=\"xMidYMid slice\">\n          <!-- Background roads (light gray) -->\n          <rect width=\"230\" height=\"200\" fill=\"#e4e4e4\"><\u002Frect>\n          <!-- Road grid -->\n          <line x1=\"0\" y1=\"70\" x2=\"230\" y2=\"70\" stroke=\"#fff\" stroke-width=\"10\"><\u002Fline>\n          <line x1=\"0\" y1=\"130\" x2=\"230\" y2=\"130\" stroke=\"#fff\" stroke-width=\"10\"><\u002Fline>\n          <line x1=\"70\" y1=\"0\" x2=\"70\" y2=\"200\" stroke=\"#fff\" stroke-width=\"10\"><\u002Fline>\n          <line x1=\"160\" y1=\"0\" x2=\"160\" y2=\"200\" stroke=\"#fff\" stroke-width=\"10\"><\u002Fline>\n          <!-- secondary roads -->\n          <line x1=\"0\" y1=\"40\" x2=\"230\" y2=\"40\" stroke=\"#fff\" stroke-width=\"6\"><\u002Fline>\n          <line x1=\"0\" y1=\"100\" x2=\"230\" y2=\"100\" stroke=\"#fff\" stroke-width=\"6\"><\u002Fline>\n          <line x1=\"0\" y1=\"165\" x2=\"230\" y2=\"165\" stroke=\"#fff\" stroke-width=\"6\"><\u002Fline>\n          <line x1=\"115\" y1=\"0\" x2=\"115\" y2=\"200\" stroke=\"#fff\" stroke-width=\"6\"><\u002Fline>\n          <!-- Route (dark) -->\n          <polyline points=\"115,200 115,130 160,130 160,70 115,70 115,20\" stroke=\"#2c2c2e\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><\u002Fpolyline>\n          <!-- Location dot -->\n          <circle cx=\"115\" cy=\"145\" r=\"9\" fill=\"#0071e3\" stroke=\"#fff\" stroke-width=\"2.5\"><\u002Fcircle>\n          <polygon points=\"115,138 111,145 119,145\" fill=\"#fff\"><\u002Fpolygon>\n        <\u002Fsvg>\n      <\u002Fdiv>\n\n      <!-- Nav footer -->\n      <div class=\"map-footer\">\n        <div class=\"nav-step\">\n          <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\">\n            <path d=\"M19 12H5M12 5l-7 7 7 7\" stroke=\"#fff\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><\u002Fpath>\n          <\u002Fsvg>\n          <div class=\"nav-step-info\">\n            <span class=\"nav-step-dist\">300m<\u002Fspan>\n            <span class=\"nav-step-label\">Take the left turn<\u002Fspan>\n          <\u002Fdiv>\n        <\u002Fdiv>\n        <div class=\"nav-step\">\n          <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\">\n            <path d=\"M5 12h14M12 5l7 7-7 7\" stroke=\"#fff\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><\u002Fpath>\n          <\u002Fsvg>\n          <div class=\"nav-step-info\">\n            <span class=\"nav-step-dist\">800m<\u002Fspan>\n            <span class=\"nav-step-label\">Take the left turn<\u002Fspan>\n          <\u002Fdiv>\n        <\u002Fdiv>\n      <\u002Fdiv>\n    <\u002Fdiv>\n\n    <!-- RIGHT COLUMN -->\n    <div class=\"col-right\">\n\n      <!-- NEXT FLIGHT -->\n      <div class=\"card card-dark flight-card\">\n        <div class=\"flight-title\">Next Flight<\u002Fdiv>\n        <div class=\"flight-route\">\n          <div class=\"flight-stop\">\n            <div class=\"flight-dot-col\">\n              <div class=\"flight-dot\"><\u002Fdiv>\n              <div class=\"flight-line\"><\u002Fdiv>\n            <\u002Fdiv>\n            <div>\n              <div class=\"flight-city\">Stuttgart<\u002Fdiv>\n              <div class=\"flight-date\">Mon, 7 Aug<\u002Fdiv>\n            <\u002Fdiv>\n          <\u002Fdiv>\n          <div class=\"flight-stop\" style=\"margin-top:0;\">\n            <div class=\"flight-dot-col\">\n              <div class=\"flight-dot\"><\u002Fdiv>\n            <\u002Fdiv>\n            <div>\n              <div class=\"flight-city\">Dubai<\u002Fdiv>\n              <div class=\"flight-date\">Tue, 8 Aug<\u002Fdiv>\n            <\u002Fdiv>\n          <\u002Fdiv>\n          <div class=\"flight-icon\">\n            <svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"#fff\" opacity=\"0.8\">\n              <path d=\"M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z\"><\u002Fpath>\n            <\u002Fsvg>\n          <\u002Fdiv>\n        <\u002Fdiv>\n      <\u002Fdiv>\n\n      <!-- MOM CALL -->\n      <div class=\"card card-white call-card\">\n        <div class=\"call-name\">Mom<\u002Fdiv>\n        <div class=\"call-time\">08:25<\u002Fdiv>\n        <div class=\"call-btns\">\n          <div class=\"call-btn\">\n            <svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\">\n              <line x1=\"1\" y1=\"1\" x2=\"23\" y2=\"23\" stroke=\"#555\" stroke-width=\"2\" stroke-linecap=\"round\"><\u002Fline>\n              <path d=\"M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6\" stroke=\"#555\" stroke-width=\"2\" stroke-linecap=\"round\"><\u002Fpath>\n              <path d=\"M17 16.95A7 7 0 015 12v-2m14 0v2a7 7 0 01-.11 1.23M12 19v3M8 23h8\" stroke=\"#555\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><\u002Fpath>\n            <\u002Fsvg>\n          <\u002Fdiv>\n          <div class=\"call-btn call-btn-red\">\n            <svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\">\n              <path d=\"M16.5 13.47c-1-.1-1.97.26-2.68.97l-1.22 1.22c-2.34-1.23-4.24-3.13-5.47-5.47l1.22-1.22c.71-.71 1.07-1.68.97-2.68L9.07 4.36A2 2 0 007.1 2.5H4.65C3.44 2.5 2.5 3.5 2.5 4.74c-.08 8.73 7.03 15.82 15.76 15.76 1.23 0 2.24-.94 2.24-2.15v-2.44a2 2 0 00-1.87-1.97l-2.13-.47z\" fill=\"#fff\"><\u002Fpath>\n              <line x1=\"3\" y1=\"3\" x2=\"21\" y2=\"21\" stroke=\"#fff\" stroke-width=\"2\" stroke-linecap=\"round\"><\u002Fline>\n            <\u002Fsvg>\n          <\u002Fdiv>\n          <div class=\"call-btn\">\n            <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"#555\">\n              <circle cx=\"5\" cy=\"5\" r=\"1.5\"><\u002Fcircle><circle cx=\"12\" cy=\"5\" r=\"1.5\"><\u002Fcircle><circle cx=\"19\" cy=\"5\" r=\"1.5\"><\u002Fcircle>\n              <circle cx=\"5\" cy=\"12\" r=\"1.5\"><\u002Fcircle><circle cx=\"12\" cy=\"12\" r=\"1.5\"><\u002Fcircle><circle cx=\"19\" cy=\"12\" r=\"1.5\"><\u002Fcircle>\n              <circle cx=\"5\" cy=\"19\" r=\"1.5\"><\u002Fcircle><circle cx=\"12\" cy=\"19\" r=\"1.5\"><\u002Fcircle><circle cx=\"19\" cy=\"19\" r=\"1.5\"><\u002Fcircle>\n            <\u002Fsvg>\n          <\u002Fdiv>\n        <\u002Fdiv>\n      <\u002Fdiv>\n    <\u002Fdiv>\n  <\u002Fdiv>\n\n  <!-- ROW 2: Mercedes Charging -->\n  <div class=\"card mercedes-card\">\n    <div class=\"mercedes-glow\"><\u002Fdiv>\n    <div class=\"mercedes-top\" style=\"position:relative;z-index:1;\">\n      <span class=\"mercedes-name\">Mercedes-Benz<\u002Fspan>\n      <div class=\"mercedes-charge-status\">\n        <svg width=\"13\" height=\"18\" viewBox=\"0 0 13 20\" fill=\"#4cff6c\">\n          <path d=\"M7.5 0L0 11h5.5L5 20l8-11H7L7.5 0z\"><\u002Fpath>\n        <\u002Fsvg>\n        60m left\n      <\u002Fdiv>\n    <\u002Fdiv>\n    <div class=\"mercedes-middle\" style=\"position:relative;z-index:1;\">\n      <div class=\"mercedes-pct\">\n        100<span class=\"mercedes-pct-sign\">%<\u002Fspan>\n      <\u002Fdiv>\n      <!-- Car SVG placeholder -->\n      <svg class=\"mercedes-car\" viewBox=\"0 0 160 80\" fill=\"none\">\n        <!-- Car body -->\n        <ellipse cx=\"80\" cy=\"62\" rx=\"68\" ry=\"8\" fill=\"rgba(0,0,0,0.25)\"><\u002Fellipse>\n        <!-- Wheels -->\n        <circle cx=\"38\" cy=\"60\" r=\"12\" fill=\"#1a1a1a\" stroke=\"#555\" stroke-width=\"2\"><\u002Fcircle>\n        <circle cx=\"38\" cy=\"60\" r=\"6\" fill=\"#333\"><\u002Fcircle>\n        <circle cx=\"122\" cy=\"60\" r=\"12\" fill=\"#1a1a1a\" stroke=\"#555\" stroke-width=\"2\"><\u002Fcircle>\n        <circle cx=\"122\" cy=\"60\" r=\"6\" fill=\"#333\"><\u002Fcircle>\n        <!-- Body -->\n        <path d=\"M18 55 Q20 40 45 35 L60 20 Q70 14 90 14 Q115 14 125 22 L142 35 Q150 40 152 55 Z\" fill=\"#c8d0d8\"><\u002Fpath>\n        <!-- Windows -->\n        <path d=\"M63 20 L58 35 L100 35 L110 20 Q100 15 85 15 Z\" fill=\"#89a8c0\" opacity=\"0.9\"><\u002Fpath>\n        <path d=\"M110 20 L102 35 L128 35 L138 28 Q130 18 115 18 Z\" fill=\"#89a8c0\" opacity=\"0.7\"><\u002Fpath>\n        <!-- Body highlights -->\n        <path d=\"M30 50 Q60 42 90 42 Q120 42 148 50\" stroke=\"rgba(255,255,255,0.4)\" stroke-width=\"1.5\" fill=\"none\"><\u002Fpath>\n        <!-- Door lines -->\n        <line x1=\"95\" y1=\"35\" x2=\"92\" y2=\"53\" stroke=\"rgba(0,0,0,0.2)\" stroke-width=\"1\"><\u002Fline>\n        <!-- Front lights -->\n        <ellipse cx=\"148\" cy=\"44\" rx=\"4\" ry=\"3\" fill=\"#fff\" opacity=\"0.8\"><\u002Fellipse>\n        <!-- Rear lights -->\n        <ellipse cx=\"19\" cy=\"47\" rx=\"3\" ry=\"2.5\" fill=\"#ff4444\" opacity=\"0.8\"><\u002Fellipse>\n        <!-- Mercedes star -->\n        <circle cx=\"85\" cy=\"15\" r=\"3\" fill=\"#ccc\" opacity=\"0.6\"><\u002Fcircle>\n      <\u002Fsvg>\n    <\u002Fdiv>\n    <div class=\"mercedes-bottom\" style=\"position:relative;z-index:1;\">\n      <div class=\"mercedes-bar-wrap\">\n        <div class=\"mercedes-bar-fill\"><\u002Fdiv>\n      <\u002Fdiv>\n      <div class=\"mercedes-info-row\">\n        <span class=\"mercedes-km\">568 km<\u002Fspan>\n        <span class=\"mercedes-kwh\">Supercharging 250KW<\u002Fspan>\n      <\u002Fdiv>\n    <\u002Fdiv>\n  <\u002Fdiv>\n\n  <!-- ROW 3: Clock/Battery + Calendar -->\n  <div class=\"row3\">\n\n    <div class=\"col-left\">\n      <!-- CLOCK -->\n      <div class=\"card card-white clock-card\">\n        <div class=\"clock-face\">\n          <div class=\"clock-circle\" id=\"clock-circle\">\n            <!-- Ticks generated by JS -->\n            <!-- Roman Numerals -->\n            <span class=\"clock-numeral\" style=\"top:10%;left:50%\">XII<\u002Fspan>\n            <span class=\"clock-numeral\" style=\"top:50%;left:88%\">III<\u002Fspan>\n            <span class=\"clock-numeral\" style=\"top:88%;left:50%\">VI<\u002Fspan>\n            <span class=\"clock-numeral\" style=\"top:50%;left:12%\">IX<\u002Fspan>\n            <!-- Hands -->\n            <div class=\"hand hand-hour\" id=\"hour-hand\"><\u002Fdiv>\n            <div class=\"hand hand-minute\" id=\"minute-hand\"><\u002Fdiv>\n            <div class=\"hand hand-second\" id=\"second-hand\"><\u002Fdiv>\n            <div class=\"clock-center\"><\u002Fdiv>\n          <\u002Fdiv>\n        <\u002Fdiv>\n      <\u002Fdiv>\n\n      <!-- BATTERY -->\n      <div class=\"card card-white battery-card\">\n        <div class=\"battery-top\">\n          <svg width=\"14\" height=\"18\" viewBox=\"0 0 13 20\" fill=\"#d94c2b\">\n            <path d=\"M7.5 0L0 11h5.5L5 20l8-11H7L7.5 0z\"><\u002Fpath>\n          <\u002Fsvg>\n          <span class=\"battery-pct\">65%<\u002Fspan>\n        <\u002Fdiv>\n        <div class=\"battery-bars\">\n          <div class=\"battery-bar on\" style=\"height:85%\"><\u002Fdiv>\n          <div class=\"battery-bar on\" style=\"height:100%\"><\u002Fdiv>\n          <div class=\"battery-bar on\" style=\"height:70%\"><\u002Fdiv>\n          <div class=\"battery-bar off\" style=\"height:55%\"><\u002Fdiv>\n          <div class=\"battery-bar off\" style=\"height:40%\"><\u002Fdiv>\n        <\u002Fdiv>\n        <div class=\"battery-eta\">~ 2 hours<\u002Fdiv>\n      <\u002Fdiv>\n    <\u002Fdiv>\n\n    <!-- DAILY ACTIVITY CALENDAR -->\n    <div class=\"card card-dark calendar-card\">\n      <div class=\"cal-header\">\n        <div class=\"cal-title\">Daily<br>Activity<\u002Fdiv>\n        <div class=\"cal-nav\">\n          <div class=\"cal-nav-icon\">\n            <svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\">\n              <rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"3\" stroke=\"#888\" stroke-width=\"2\"><\u002Frect>\n              <line x1=\"16\" y1=\"2\" x2=\"16\" y2=\"6\" stroke=\"#888\" stroke-width=\"2\" stroke-linecap=\"round\"><\u002Fline>\n              <line x1=\"8\" y1=\"2\" x2=\"8\" y2=\"6\" stroke=\"#888\" stroke-width=\"2\" stroke-linecap=\"round\"><\u002Fline>\n            <\u002Fsvg>\n          <\u002Fdiv>\n          <div class=\"cal-month-pill\">July<\u002Fdiv>\n          <div class=\"cal-month-pill\">2025<\u002Fdiv>\n        <\u002Fdiv>\n      <\u002Fdiv>\n\n      <!-- Today pill -->\n      <div class=\"cal-today-pill\">Jul<\u002Fdiv>\n\n      <div class=\"cal-grid\">\n        <!-- Header row (days of week abbreviated) -->\n        <!-- Week -1 (overflow from June) -->\n        <div class=\"cal-day prev-month\">27<\u002Fdiv>\n        <div class=\"cal-day prev-month\">28<\u002Fdiv>\n        <div class=\"cal-day prev-month\">29<\u002Fdiv>\n        <div class=\"cal-day prev-month\">30<\u002Fdiv>\n        <!-- July starts on Tuesday (index 1) -->\n        <div class=\"cal-day white-circle\">1<\u002Fdiv>\n        <div class=\"cal-day lime\">2<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#555\">3<\u002Fdiv>\n\n        <div class=\"cal-day lime-outline\">4<\u002Fdiv>\n        <div class=\"cal-day lime\">5<\u002Fdiv>\n        <div class=\"cal-day lime\">6<\u002Fdiv>\n        <div class=\"cal-day lime\">7<\u002Fdiv>\n        <div class=\"cal-day red\">8<\u002Fdiv>\n        <div class=\"cal-day outline\">9<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">10<\u002Fdiv>\n\n        <div class=\"cal-day\" style=\"color:#444\">11<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">12<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">13<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">14<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">15<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">16<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">17<\u002Fdiv>\n\n        <div class=\"cal-day\" style=\"color:#444\">18<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">19<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">20<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">21<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">22<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">23<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">24<\u002Fdiv>\n\n        <div class=\"cal-day\" style=\"color:#444\">25<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">26<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">27<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">28<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">29<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">30<\u002Fdiv>\n        <div class=\"cal-day\" style=\"color:#444\">31<\u002Fdiv>\n      <\u002Fdiv>\n    <\u002Fdiv>\n  <\u002Fdiv>\n\n<\u002Fdiv>\n\n<script>\n  // Live clock\n  function updateClock() {\n    const now = new Date();\n    const h = now.getHours() % 12;\n    const m = now.getMinutes();\n    const s = now.getSeconds();\n    const hourDeg = (h * 30) + (m * 0.5);\n    const minDeg = m * 6;\n    const secDeg = s * 6;\n    document.getElementById('hour-hand').style.transform = `rotate(${hourDeg}deg)`;\n    document.getElementById('minute-hand').style.transform = `rotate(${minDeg}deg)`;\n    document.getElementById('second-hand').style.transform = `rotate(${secDeg}deg)`;\n  }\n  updateClock();\n  setInterval(updateClock, 1000);\n<\u002Fscript>\n\n\n\n<\u002Fbody><\u002Fhtml>"
+  </script>
+</body>
+</html>
