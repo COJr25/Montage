@@ -121,7 +121,7 @@
 .battery-pct { font-size: 22px; font-weight: 700; color: #1c1c1e; }
 .battery-bars { display: flex; align-items: flex-end; gap: 4px; height: 36px; margin: 4px 0; }
 .battery-bar { flex: 1; border-radius: 5px; }
-.battery-bar.on  { background: #d94c2b; }
+.battery-bar.on  { background: #FF3B30; }
 .battery-bar.off { background: #ccc; }
 .battery-eta { font-size: 11px; color: #888; text-align: center; }
 
@@ -136,9 +136,9 @@
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
 .cal-day { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 11.5px; color: #555; border-radius: 50%; font-weight: 500; }
 .cal-day.prev-month { color: #444; }
-.cal-day.lime        { background: #b5e61d; color: #1a2a00; font-weight: 700; }
-.cal-day.lime-outline{ background: transparent; border: 2px solid #b5e61d; color: #b5e61d; font-weight: 700; }
-.cal-day.red         { background: #e02020; color: #fff; font-weight: 700; }
+.cal-day.lime        { background: #92FE01; color: #1a2a00; font-weight: 700; }
+.cal-day.lime-outline{ background: transparent; border: 2px solid #92FE01; color: #92FE01; font-weight: 700; }
+.cal-day.red         { background: #FF3B30; color: #fff; font-weight: 700; }
 .cal-day.white-circle{ background: #f0f0f0; color: #1c1c1e; font-weight: 700; }
 .cal-day.outline     { border: 1.5px solid #555; color: #888; }
 
@@ -151,7 +151,22 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 .sig-tagline { font-size: 66px; font-weight: 300; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(30,30,30,0.5); margin-top: 80px; font-family: -apple-system, 'SF Pro Display', sans-serif; }
+
+#bg-vignette {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(0,0,0,0.4) 100%);
+  pointer-events: none; z-index: 5;
+}
+.bento { display: flex; flex-direction: column; gap: 10px; padding: 10px; height: 100%; }
+.mercedes-glass-reflect {
+  position: absolute; top: 0; left: 0; width: 80px; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  pointer-events: none; z-index: 2;
+}
 </style>
+
+<!-- VIGNETTE -->
+<div id="bg-vignette"></div>
 
 <!-- FLASH OVERLAY -->
 <div id="flash-overlay" style="position:absolute;inset:0;background:#b8b8b8;opacity:0;z-index:50;pointer-events:none;"></div>
@@ -206,7 +221,7 @@
           <!-- FLIGHT -->
           <div id="c-flight" class="card card-dark flight-card">
             <div class="flight-title">Next Flight</div>
-            <div class="flight-route">
+            <div id="flight-details" class="flight-route">
               <div class="flight-stop">
                 <div class="flight-dot-col"><div class="flight-dot"></div><div class="flight-line"></div></div>
                 <div><div class="flight-city">Stuttgart</div><div class="flight-date">Mon, 7 Aug</div></div>
@@ -223,12 +238,12 @@
           <!-- CALL -->
           <div id="c-call" class="card card-white call-card">
             <div class="call-name">Mom</div>
-            <div class="call-time">08:25</div>
+            <div id="call-timer-text" class="call-time">08:25</div>
             <div class="call-btns">
               <div class="call-btn">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><line x1="1" y1="1" x2="23" y2="23" stroke="#555" stroke-width="2" stroke-linecap="round"/><path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6" stroke="#555" stroke-width="2" stroke-linecap="round"/></svg>
               </div>
-              <div class="call-btn call-btn-red">
+              <div id="call-btn-decline" class="call-btn call-btn-red">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M16.5 13.47c-1-.1-1.97.26-2.68.97l-1.22 1.22c-2.34-1.23-4.24-3.13-5.47-5.47l1.22-1.22c.71-.71 1.07-1.68.97-2.68L9.07 4.36A2 2 0 007.1 2.5H4.65C3.44 2.5 2.5 3.5 2.5 4.74c-.08 8.73 7.03 15.82 15.76 15.76 1.23 0 2.24-.94 2.24-2.15v-2.44a2 2 0 00-1.87-1.97l-2.13-.47z" fill="#fff"/></svg>
               </div>
               <div class="call-btn">
@@ -242,6 +257,7 @@
       <!-- ROW 2: Mercedes Charging -->
       <div id="c-mercedes" class="card mercedes-card">
         <div class="mercedes-glow"></div>
+        <div class="mercedes-glass-reflect"></div>
         <div class="mercedes-top">
           <span class="mercedes-name">Mercedes-Benz</span>
           <div class="mercedes-charge">
@@ -251,7 +267,7 @@
         </div>
         <div class="mercedes-middle">
           <div class="mercedes-pct">100<span class="mercedes-pct-sign">%</span></div>
-          <svg class="mercedes-car" viewBox="0 0 160 80" fill="none">
+          <svg id="car-image" class="mercedes-car" viewBox="0 0 160 80" fill="none">
             <ellipse cx="80" cy="72" rx="68" ry="6" fill="rgba(0,0,0,0.25)"/>
             <circle cx="38" cy="60" r="12" fill="#1a1a1a" stroke="#555" stroke-width="2"/><circle cx="38" cy="60" r="6" fill="#333"/>
             <circle cx="122" cy="60" r="12" fill="#1a1a1a" stroke="#555" stroke-width="2"/><circle cx="122" cy="60" r="6" fill="#333"/>
@@ -290,7 +306,7 @@
           <!-- BATTERY -->
           <div id="c-battery" class="card card-white battery-card">
             <div class="battery-top">
-              <svg width="14" height="18" viewBox="0 0 13 20" fill="#d94c2b"><path d="M7.5 0L0 11h5.5L5 20l8-11H7L7.5 0z"/></svg>
+              <svg id="battery-bolt" width="14" height="18" viewBox="0 0 13 20" fill="#FF3B30"><path d="M7.5 0L0 11h5.5L5 20l8-11H7L7.5 0z"/></svg>
               <span class="battery-pct">65%</span>
             </div>
             <div class="battery-bars">
@@ -357,84 +373,119 @@
 
 <script id="s4">
 window.__timelines = window.__timelines || {};
-
 var S = 2.769;
-gsap.set('.bento-content', { scale: S, transformOrigin: 'center center' });
+
+// Caméra démarre très zoomée (scale 3.5×S)
+gsap.set('.bento-content', { scale: S*3.5, transformOrigin: 'center center', x: 0, y: 0 });
 
 var tl = gsap.timeline({ paused: true });
 
-// ── GRID SPRING-IN (diagonale haut-gauche → bas-droit) ─────────────
-tl.from('#c-map',      { scale:0.72, opacity:0, duration:0.6, ease:'back.out(2.0)' }, 0.10);
-tl.from('#c-flight',   { scale:0.72, opacity:0, duration:0.6, ease:'back.out(1.8)' }, 0.18);
-tl.from('#c-call',     { scale:0.72, opacity:0, duration:0.5, ease:'back.out(1.7)' }, 0.26);
-tl.from('#c-mercedes', { scale:0.72, opacity:0, duration:0.6, ease:'back.out(2.0)' }, 0.32);
-tl.from('#c-clock',    { scale:0.72, opacity:0, duration:0.5, ease:'back.out(1.7)' }, 0.40);
-tl.from('#c-battery',  { scale:0.72, opacity:0, duration:0.5, ease:'back.out(1.6)' }, 0.48);
-tl.from('#c-calendar', { scale:0.72, opacity:0, duration:0.6, ease:'back.out(1.8)' }, 0.56);
+// ── ÉTATS INITIAUX (t=0) ──────────────────────────────────────────────
+tl.set('#bg-vignette',            { opacity: 0.6 }, 0);
+tl.set('#c-calendar',             { y: 200 }, 0);
+tl.set('#c-battery',              { y: 400 }, 0);
+tl.set('#c-clock',                { opacity: 0 }, 0);
+tl.set('#c-mercedes',             { opacity: 0 }, 0);
+tl.set('#c-map',                  { clipPath: 'inset(50%)' }, 0);
+tl.set('#c-flight',               { x: 100, opacity: 0 }, 0);
+tl.set('#c-call',                 { y: 50, opacity: 0 }, 0);
+tl.set('.cal-header',             { opacity: 0 }, 0);
+tl.set('.cal-day',                { scale: 0.2 }, 0);
+tl.set('.battery-bar.on',         { scaleY: 0, transformOrigin: 'bottom' }, 0);
+tl.set('.mercedes-bar-fill',      { scaleX: 0, transformOrigin: 'left', background: '#444444' }, 0);
+tl.set('.nav-step',               { scale: 0, transformOrigin: 'center' }, 0);
+tl.set('#call-timer-text',        { opacity: 0 }, 0);
+tl.set('.mercedes-glass-reflect', { x: '-100%' }, 0);
+tl.set('#car-image',              { x: -80, opacity: 0 }, 0);
+tl.set('#hour-hand',              { rotation: 0, transformOrigin: '50% 100%' }, 0);
+tl.set('#minute-hand',            { rotation: 0, transformOrigin: '50% 100%' }, 0);
+tl.set('#second-hand',            { rotation: 0, transformOrigin: '50% 100%' }, 0);
+tl.set('.flight-stop',            { x: -20, opacity: 0 }, 0);
+tl.set('.call-name, .call-btns',  { filter: 'blur(15px)' }, 0);
 
-// ── FOCUS 1 : Batterie + Horloge (bas-gauche) ──────────────────────
-// (76, 540) scale=4.2 → dx=500, dy=-812. Légère rotation pour feel caméra.
-tl.to('.bento-content', { scale:4.2, x:500, y:-812, rotation:-0.35, duration:0.55, ease:'expo.out' }, 1.0);
-tl.to('.bento-content', { rotation:0, duration:0.35, ease:'power2.out' }, 1.55);
+// ── VIGNETTE + ZOOM-OUT CONTINU ───────────────────────────────────────
+tl.to('#bg-vignette',    { opacity: 0.2, duration: 5.0, ease: 'power2.out' }, 0);
+tl.to('.bento-content',  { scale: S*1.80, duration: 1.40, ease: 'expo.out' }, 0);
 
-// Aiguilles horloge → 9:41
-tl.fromTo('#hour-hand',   { rotation:0,   transformOrigin:'50% 100%' },
-                          { rotation:290.5, duration:0.9,  ease:'back.out(1.8)' }, 1.7);
-tl.fromTo('#minute-hand', { rotation:0,   transformOrigin:'50% 100%' },
-                          { rotation:246,  duration:0.75, ease:'back.out(2.2)' }, 1.9);
-// Barres batterie
-tl.fromTo('.battery-bar.on', { scaleY:0, transformOrigin:'bottom' },
-                              { scaleY:1, duration:0.5, ease:'power3.out', stagger:0.08 }, 1.65);
+// Widget entries pendant le zoom-out
+tl.to('#c-calendar', { y: 0,          duration: 0.60, ease: 'expo.out'      }, 0.05);
+tl.to('#c-battery',  { y: 0,          duration: 0.70, ease: 'expo.out'      }, 0.42);
+tl.to('#c-clock',    { opacity: 1,    duration: 0.30, ease: 'power2.inOut'  }, 0.80);
+tl.to('#c-mercedes', { opacity: 1,    duration: 0.40, ease: 'power2.out'    }, 0.85);
+tl.to('#c-map',      { clipPath: 'inset(0%)', duration: 0.60, ease: 'expo.out' }, 1.15);
+tl.to('#c-call',     { y: 0, opacity: 1, duration: 0.50, ease: 'back.out(1.7)' }, 1.45);
+tl.to('#c-flight',   { x: 0, opacity: 1, duration: 0.60, ease: 'expo.out'  }, 1.55);
 
-// ── FOCUS 2 : Calendrier (bas-droit) ───────────────────────────────
-// (260, 540) scale=4.2 → dx=-273, dy=-812. Pan rapide vers droite, tilt opposé.
-tl.to('.bento-content', { scale:4.2, x:-273, y:-812, rotation:0.4, duration:0.42, ease:'expo.out' }, 4.0);
-tl.to('.bento-content', { rotation:0, duration:0.28, ease:'back.out(1.4)' }, 4.42);
+// ── CAMÉRA 1 : Center → Calendrier [810,1420] ─────────────────────────
+// dx=1.40×(540-810)=-378, dy=1.40×(960-1420)=-644, 1° CW, power4.out
+tl.to('.bento-content', { scale: S*1.40, x: -378, y: -644, rotation: 1, duration: 1.70, ease: 'power4.out' }, 1.40);
+tl.to('.bento-content', { rotation: 0, duration: 0.40, ease: 'power2.out', overwrite: 'auto' }, 1.80);
 
-tl.from('.cal-day.lime', { scale:0, opacity:0, duration:0.22, ease:'back.out(3)', stagger:0.045 }, 4.55);
-tl.from('.cal-day.red',  { scale:0, opacity:0, duration:0.22, ease:'back.out(3)' }, 4.85);
+// Calendrier internals
+tl.to('.cal-header', { opacity: 1, duration: 0.35, ease: 'power2.out' }, 1.40);
+tl.to('.cal-day', { scale: 1, duration: 0.50, ease: 'back.out(1.5)', stagger: 0.015 }, 1.45);
+tl.to(['.cal-day.lime', '.cal-day.lime-outline'], { scale: 1.1, duration: 0.30, ease: 'elastic.out(1,0.3)' }, 1.65);
 
-// ── FOCUS 3 : Mercedes — tracking shot gauche → droite ─────────────
-// Arrive sur le côté GAUCHE (le %) : (50, 285) scale=3.8
-// dx=(195-50)*3.8=551, dy=(346.5-285)*3.8=234
-tl.to('.bento-content', { scale:3.8, x:551, y:234, rotation:-0.25, duration:0.55, ease:'expo.out' }, 6.0);
-tl.to('.bento-content', { rotation:0, duration:0.3, ease:'power2.out' }, 6.55);
+// ── CAMÉRA 2 : Calendrier → Batterie [280,1450] ───────────────────────
+// dx=1.45×(540-280)=377, dy=1.45×(960-1450)=-711, 2° CCW, expo.inOut
+tl.to('.bento-content', { scale: S*1.45, x: 377, y: -711, rotation: -2, duration: 1.70, ease: 'expo.inOut' }, 3.10);
+tl.to('.bento-content', { rotation: 0, duration: 0.40, ease: 'power2.out', overwrite: 'auto' }, 3.50);
 
-// Barre commence à 0 — set dans la timeline avant le fill
-tl.set('.mercedes-bar-fill', { scaleX:0, transformOrigin:'left' }, 6.7);
+// Batterie internals
+tl.to('#battery-bolt',   { scale: 1.2, duration: 0.60, ease: 'sine.inOut', yoyo: true, repeat: 18 }, 3.10);
+tl.to('.battery-bar.on', { scaleY: 1,  duration: 0.45, ease: 'expo.out', stagger: 0.05 }, 3.25);
 
-// Pan DROITE + fill en simultané, même ease, même durée = tracking parfait
-// Cible droite (345, 285) scale=3.8 → dx=(195-345)*3.8=-570
-tl.to('.bento-content',    { x:-570, duration:2.5, ease:'power1.inOut' }, 6.8);
-tl.to('.mercedes-bar-fill', { scaleX:1, duration:2.5, ease:'power1.inOut' }, 6.8);
-tl.to('.mercedes-glow',    { opacity:0.55, duration:1.2, ease:'sine.inOut', yoyo:true, repeat:1 }, 7.2);
+// ── CAMÉRA 3 : Batterie → Pan haut [280,1150] ─────────────────────────
+// dx=1.60×(540-280)=416, dy=1.60×(960-1150)=-304, power3.out
+tl.to('.bento-content', { scale: S*1.60, x: 416, y: -304, duration: 1.70, ease: 'power3.out' }, 4.80);
 
-// ── FOCUS 4a : Carte navigation (haut-gauche) ──────────────────────
-// (98, 97) scale=4.0 → dx=388, dy=998
-tl.to('.bento-content', { scale:4.0, x:388, y:998, rotation:0.3, duration:0.48, ease:'expo.out' }, 9.3);
-tl.to('.bento-content', { rotation:0, duration:0.28, ease:'power2.out', overwrite:'auto' }, 9.78);
+// ── CAMÉRA 4 : → Mercedes + Horloge [540,900] ────────────────────────
+// dx=1.20×(540-540)=0, dy=1.20×(960-900)=72, 1.5° CW, expo.out
+tl.to('.bento-content', { scale: S*1.20, x: 0, y: 72, rotation: 1.5, duration: 2.30, ease: 'expo.out' }, 6.50);
+tl.to('.bento-content', { rotation: 0, duration: 0.45, ease: 'power2.out', overwrite: 'auto' }, 6.95);
 
-tl.to('#map-route', { strokeDashoffset:0, duration:1.7, ease:'power2.inOut' }, 9.85);
+// Mercedes internals
+tl.to('#car-image',            { x: 0, opacity: 1, duration: 1.20, ease: 'expo.out'   }, 6.50);
+tl.to('.mercedes-bar-fill',    { scaleX: 1, background: '#92FE01', duration: 1.50, ease: 'power4.out' }, 6.70);
+tl.to('.mercedes-glow',        { opacity: 1, duration: 0.80, ease: 'sine.inOut'        }, 7.00);
+tl.to('.mercedes-glass-reflect', { x: '600%', duration: 0.60, ease: 'power3.inOut'    }, 7.20);
 
-// ── FOCUS 4b : Vol + Appel (haut-droit) ────────────────────────────
-// (282, 97) scale=4.0 → dx=-348, dy=998
-tl.to('.bento-content', { scale:4.0, x:-348, y:998, rotation:-0.3, duration:0.44, ease:'expo.out' }, 11.0);
-tl.to('.bento-content', { rotation:0, duration:0.26, ease:'power2.out' }, 11.44);
+// Horloge (même région)
+tl.to('#hour-hand',   { rotation: 290.5, duration: 0.90, ease: 'back.out(1.8)' }, 6.70);
+tl.to('#minute-hand', { rotation: 246,   duration: 0.75, ease: 'back.out(2.2)' }, 6.90);
+tl.to('#second-hand', { rotation: 360,   duration: 1.00, ease: 'linear', repeat: 7  }, 6.80);
 
-tl.to('#c-call', { boxShadow:'0 0 0 4px rgba(232,57,42,0.5)', duration:0.5, ease:'power2.out', yoyo:true, repeat:3 }, 11.3);
+// ── CAMÉRA 5 : → Carte navigation [250,500] ───────────────────────────
+// dx=1.30×(540-250)=377, dy=1.30×(960-500)=598, 3° CCW, power4.inOut
+tl.to('.bento-content', { scale: S*1.30, x: 377, y: 598, rotation: -3, duration: 2.10, ease: 'power4.inOut' }, 8.80);
+tl.to('.bento-content', { rotation: 0, duration: 0.50, ease: 'power2.out', overwrite: 'auto' }, 9.30);
 
-// ── PULL-BACK FINAL (axe Z, expo.out long) ────────────────────────
-tl.to('.bento-content', { scale:S, x:0, y:0, rotation:0, duration:2.4, ease:'expo.out' }, 12.5);
+// Map internals
+tl.to('#map-route', { strokeDashoffset: 0, duration: 2.50, ease: 'power1.inOut' }, 8.80);
+tl.to('.nav-step',  { scale: 1, duration: 0.40, ease: 'back.out(1.7)', stagger: 0.20 }, 9.60);
+tl.to('.nav-step',  { scale: 1.08, duration: 0.60, ease: 'sine.inOut', yoyo: true, repeat: 7  }, 10.10);
 
-// ── FLASH TRANSITION ──────────────────────────────────────────────
-tl.to('#flash-overlay', { opacity:1, duration:0.5, ease:'power2.in'  }, 14.6);
-tl.to('#flash-overlay', { opacity:0, duration:0.4, ease:'power2.out' }, 15.5);
+// ── CAMÉRA 6 : → Vol + Appel [820,600] ───────────────────────────────
+// dx=1.30×(540-820)=-364, dy=1.30×(960-600)=468, 2° CW, expo.out
+tl.to('.bento-content', { scale: S*1.30, x: -364, y: 468, rotation: 2, duration: 2.30, ease: 'expo.out' }, 10.90);
+tl.to('.bento-content', { rotation: 0, duration: 0.45, ease: 'power2.out', overwrite: 'auto' }, 11.35);
 
-// ── SIGNATURE OUTRO ───────────────────────────────────────────────
-tl.to('#sig-s',         { strokeDashoffset:0, duration:1.5, ease:'power2.inOut' }, 15.6);
-tl.to('#sig-divider',   { strokeDashoffset:0, duration:0.5, ease:'power2.out'   }, 15.9);
-tl.to('#ignature-rect', { attr:{width:560},   duration:1.1, ease:'power3.out'   }, 16.5);
-tl.to('#sig-tagline',   { opacity:0.6,        duration:0.6, ease:'power2.out'   }, 17.3);
+// Phone + Flight internals
+tl.to('.call-name, .call-btns', { filter: 'blur(0px)', duration: 0.50, ease: 'power2.out' }, 10.90);
+tl.to('#call-btn-decline', { scale: 1.10, duration: 0.50, ease: 'sine.inOut', yoyo: true, repeat: 7  }, 10.90);
+tl.to('#call-timer-text',  { opacity: 1,  duration: 0.30, ease: 'power2.out' }, 11.10);
+tl.to('.flight-stop', { x: 0, opacity: 1, duration: 0.40, ease: 'power3.out', stagger: 0.08 }, 11.10);
+
+// ── PULL-BACK FINAL [540,960] ─────────────────────────────────────────
+tl.to('.bento-content', { scale: S, x: 0, y: 0, rotation: 0, duration: 1.80, ease: 'back.out(1.2)' }, 13.20);
+
+// ── FLASH + SIGNATURE ─────────────────────────────────────────────────
+tl.to('#flash-overlay', { opacity: 1, duration: 0.50, ease: 'power2.in'  }, 14.80);
+tl.to('#flash-overlay', { opacity: 0, duration: 0.40, ease: 'power2.out' }, 15.30);
+tl.to('#sig-s',         { strokeDashoffset: 0, duration: 1.50, ease: 'power2.inOut' }, 15.60);
+tl.to('#sig-divider',   { strokeDashoffset: 0, duration: 0.50, ease: 'power2.out'   }, 15.90);
+tl.to('#ignature-rect', { attr: { width: 560 }, duration: 1.10, ease: 'power3.out'  }, 16.50);
+tl.to('#sig-tagline',   { opacity: 0.6, duration: 0.60, ease: 'power2.out'          }, 17.30);
 
 window.__timelines['bento-grid'] = tl;
 </script>
