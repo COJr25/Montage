@@ -36,8 +36,8 @@
 
 /* Cards */
 .card { border-radius: 28px; overflow: hidden; position: relative; }
-.card-white { background: #f0f0f0; box-shadow: 0 4px 24px rgba(0,0,0,0.13), 0 1px 3px rgba(0,0,0,0.08); }
-.card-dark  { background: #1c1c1e; box-shadow: 0 4px 24px rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.15); }
+.card-white { background: #f0f0f0; box-shadow: 0 6px 32px rgba(0,0,0,0.22), 0 2px 6px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.80); }
+.card-dark  { background: #1c1c1e; box-shadow: 0 6px 32px rgba(0,0,0,0.50), 0 2px 6px rgba(0,0,0,0.28); }
 
 /* ROW 1 */
 .row1 { display: grid; grid-template-columns: 1fr 152px; gap: 10px; align-items: stretch; }
@@ -381,13 +381,14 @@ var tl = gsap.timeline({ paused: true });
 
 // ── ÉTATS INITIAUX ────────────────────────────────────────────────────
 tl.set('#bg-vignette',            { opacity: 0.9 }, 0);
-tl.set('#c-calendar',             { y: 200 }, 0);
-tl.set('#c-battery',              { y: 400 }, 0);
+// scale-based depth : widgets "émergent" depuis la profondeur (pas tombent du haut)
+tl.set('#c-calendar',             { scale: 0.88, opacity: 0 }, 0);
+tl.set('#c-battery',              { scale: 0.88, opacity: 0 }, 0);
 tl.set('#c-clock',                { opacity: 0 }, 0);
 tl.set('#c-mercedes',             { opacity: 0 }, 0);
 tl.set('#c-map',                  { clipPath: 'inset(50%)' }, 0);
-tl.set('#c-flight',               { x: 100, opacity: 0 }, 0);
-tl.set('#c-call',                 { y: 50, opacity: 0 }, 0);
+tl.set('#c-flight',               { x: 40, scale: 0.94, opacity: 0 }, 0);
+tl.set('#c-call',                 { y: 20, scale: 0.94, opacity: 0 }, 0);
 tl.set('.cal-header',             { opacity: 0 }, 0);
 tl.set('.cal-day',                { scale: 0.2 }, 0);
 tl.set('.battery-bar.on',         { scaleY: 0, transformOrigin: 'bottom' }, 0);
@@ -410,38 +411,39 @@ tl.to('#second-hand', { rotation: 360, duration: 1.0, ease: 'linear', repeat: 14
 tl.to('#bg-vignette',   { opacity: 0.35, duration: 5.0, ease: 'power2.out' }, 0);
 tl.to('.bento-content', { scale: S*1.80, duration: 1.40, ease: 'expo.out'  }, 0);
 
-// Widget entries — apparition décalée intentionnelle
-tl.to('#c-calendar', { y: 0, duration: 0.65, ease: 'back.out(1.4)'        }, 0.05);
-tl.to('#c-battery',  { y: 0, duration: 0.70, ease: 'power3.out'           }, 0.48);
-tl.to('#c-clock',    { opacity: 1, duration: 0.60, ease: 'power2.out'     }, 0.82);
-tl.to('#c-mercedes', { opacity: 1, duration: 0.60, ease: 'power2.out'     }, 0.98);
-tl.to('#c-map',      { clipPath: 'inset(0%)', duration: 0.80, ease: 'power3.out' }, 1.12);
-tl.to('#c-call',     { y: 0, opacity: 1, duration: 0.60, ease: 'back.out(1.8)' }, 1.48);
-tl.to('#c-flight',   { x: 0, opacity: 1, duration: 0.60, ease: 'power3.out'   }, 1.62);
+// Widget entries — snap énergique, back.out = légère élasticité de matière
+tl.to('#c-calendar', { scale: 1.0, opacity: 1, duration: 0.40, ease: 'back.out(1.8)'   }, 0.05);
+tl.to('#c-battery',  { scale: 1.0, opacity: 1, duration: 0.38, ease: 'back.out(1.8)'   }, 0.45);
+tl.to('#c-clock',    { opacity: 1,             duration: 0.40, ease: 'power3.out'       }, 0.82);
+tl.to('#c-mercedes', { opacity: 1,             duration: 0.40, ease: 'power3.out'       }, 0.98);
+tl.to('#c-map',      { clipPath: 'inset(0%)',  duration: 0.55, ease: 'expo.out'         }, 1.12);
+tl.to('#c-call',     { y: 0, scale: 1.0, opacity: 1, duration: 0.40, ease: 'back.out(1.8)' }, 1.48);
+tl.to('#c-flight',   { x: 0, scale: 1.0, opacity: 1, duration: 0.40, ease: 'back.out(1.6)' }, 1.62);
 
 // ── CAMÉRA 1 : Whip → Calendrier ──────────────────────────────────────
-// power4.inOut : accélération → pic → freinage (physique réelle, pas snap numérique)
 tl.to('.bento-content', { filter: 'blur(12px)', duration: 0.12, ease: 'power3.in',   overwrite: 'auto' }, 1.40);
 tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.78, ease: 'expo.out',    overwrite: 'auto' }, 1.52);
 tl.to('.bento-content', { scale: S*1.40, x: -378, y: -644, rotation: 1, duration: 0.90, ease: 'power4.inOut', overwrite: 'auto' }, 1.40);
-tl.to('.bento-content', { rotation: 0, duration: 0.28, ease: 'sine.out',  overwrite: 'auto' }, 2.32);
-tl.to('.bento-content', { x: -374, y: -647, duration: 0.90, ease: 'sine.inOut', overwrite: 'auto' }, 2.65);
+tl.to('.bento-content', { rotation: 0, duration: 0.28, ease: 'sine.out', overwrite: 'auto' }, 2.32);
+// Breathe cam 1 : dérive simple (fenêtre ~0.45s, trop courte pour oscillation)
+tl.to('.bento-content', { x: -374, y: -647, duration: 0.40, ease: 'sine.inOut', overwrite: 'auto' }, 2.65);
 
-// Calendrier
-tl.to('.cal-header', { opacity: 1, duration: 0.45, ease: 'power2.out' }, 2.33);
-tl.to('.cal-day', { scale: 1, duration: 0.60, ease: 'back.out(1.8)', stagger: { each: 0.022, from: 'center' } }, 2.37);
-tl.to(['.cal-day.lime', '.cal-day.lime-outline'], { scale: 1.1, duration: 0.30, ease: 'back.out(2.0)', stagger: 0.04 }, 2.58);
+// Calendrier — DÉMARRE PENDANT la décélération caméra = flow coordonné
+tl.to('.cal-header', { opacity: 1, duration: 0.45, ease: 'power2.out' }, 2.10);
+tl.to('.cal-day', { scale: 1, duration: 0.50, ease: 'back.out(1.8)', stagger: { each: 0.022, from: 'center' } }, 2.14);
+tl.to(['.cal-day.lime', '.cal-day.lime-outline'], { scale: 1.1, duration: 0.28, ease: 'back.out(2.0)', stagger: 0.04 }, 2.35);
 
 // ── CAMÉRA 2 : Whip → Batterie ───────────────────────────────────────
 tl.to('.bento-content', { filter: 'blur(14px)', duration: 0.12, ease: 'power3.in',   overwrite: 'auto' }, 3.10);
 tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.73, ease: 'expo.out',    overwrite: 'auto' }, 3.22);
 tl.to('.bento-content', { scale: S*1.45, x: 377, y: -711, rotation: -2, duration: 0.85, ease: 'power4.inOut', overwrite: 'auto' }, 3.10);
-tl.to('.bento-content', { rotation: 0, duration: 0.26, ease: 'sine.out',  overwrite: 'auto' }, 3.97);
-tl.to('.bento-content', { x: 380, y: -715, duration: 0.82, ease: 'sine.inOut', overwrite: 'auto' }, 4.30);
+tl.to('.bento-content', { rotation: 0, duration: 0.26, ease: 'sine.out', overwrite: 'auto' }, 3.97);
+// Breathe cam 2 : oscillation courte yoyo (0.50s disponibles → 0.24s×2 = 0.48s)
+tl.to('.bento-content', { x: 380, y: -715, duration: 0.24, ease: 'sine.inOut', yoyo: true, repeat: 1, overwrite: 'auto' }, 4.30);
 
-// Batterie
-tl.to('#battery-bolt',   { scale: 1.15, duration: 0.65, ease: 'sine.inOut', yoyo: true, repeat: 16 }, 3.98);
-tl.to('.battery-bar.on', { scaleY: 1, duration: 0.55, ease: 'elastic.out(1, 0.5)', stagger: { each: 0.06, from: 'end' } }, 4.08);
+// Batterie — démarre pendant la décélération
+tl.to('#battery-bolt',   { scale: 1.15, duration: 0.65, ease: 'sine.inOut', yoyo: true, repeat: 16 }, 3.75);
+tl.to('.battery-bar.on', { scaleY: 1, duration: 0.55, ease: 'elastic.out(1, 0.5)', stagger: { each: 0.06, from: 'end' } }, 3.85);
 
 // ── CAMÉRA 3 : Whip → Pan haut ───────────────────────────────────────
 tl.to('.bento-content', { filter: 'blur(10px)', duration: 0.12, ease: 'power3.in',   overwrite: 'auto' }, 4.80);
@@ -452,43 +454,45 @@ tl.to('.bento-content', { scale: S*1.60, x: 416, y: -304, duration: 0.80, ease: 
 tl.to('.bento-content', { filter: 'blur(13px)', duration: 0.12, ease: 'power3.in',   overwrite: 'auto' }, 6.50);
 tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.83, ease: 'expo.out',    overwrite: 'auto' }, 6.62);
 tl.to('.bento-content', { scale: S*1.20, x: 0, y: 72, rotation: 1.5, duration: 0.95, ease: 'power4.inOut', overwrite: 'auto' }, 6.50);
-tl.to('.bento-content', { rotation: 0, duration: 0.30, ease: 'sine.out',  overwrite: 'auto' }, 7.47);
-tl.to('.bento-content', { x: 3, y: 70, duration: 1.10, ease: 'sine.inOut', overwrite: 'auto' }, 7.80);
+tl.to('.bento-content', { rotation: 0, duration: 0.30, ease: 'sine.out', overwrite: 'auto' }, 7.47);
+// Breathe cam 4 : oscillation complète yoyo (1.0s → 0.48s×2 = 0.96s)
+tl.to('.bento-content', { x: 3, y: 70, duration: 0.48, ease: 'sine.inOut', yoyo: true, repeat: 1, overwrite: 'auto' }, 7.80);
 
-// Mercedes
-tl.to('#car-image',              { x: 0, opacity: 1, duration: 1.20, ease: 'power3.out'             }, 7.52);
-tl.to('.mercedes-bar-fill',      { scaleX: 1, background: '#92FE01', duration: 1.50, ease: 'power4.out' }, 7.65);
-tl.to('.mercedes-glow',          { opacity: 1, duration: 0.90, ease: 'sine.inOut'                   }, 7.90);
-tl.to('.mercedes-glass-reflect', { x: '600%',  duration: 0.60, ease: 'power3.inOut'                 }, 8.15);
-
-// Horloge — turbine : expo.out conservé (effet centrifuge intentionnel)
-tl.to('#hour-hand',   { rotation: 720 + 290.5, duration: 1.10, ease: 'expo.out' }, 7.55);
-tl.to('#minute-hand', { rotation: 1440 + 246,  duration: 0.90, ease: 'expo.out' }, 7.70);
+// Mercedes + Horloge — démarrent pendant la décélération
+tl.to('#car-image',              { x: 0, opacity: 1, duration: 1.10, ease: 'power3.out'              }, 7.28);
+tl.to('.mercedes-bar-fill',      { scaleX: 1, background: '#92FE01', duration: 1.40, ease: 'power4.out' }, 7.42);
+tl.to('.mercedes-glow',          { opacity: 1, duration: 0.90, ease: 'sine.inOut'                    }, 7.70);
+tl.to('.mercedes-glass-reflect', { x: '600%',  duration: 0.60, ease: 'power3.inOut'                  }, 8.00);
+// Horloge turbine — expo.out conservé (effet centrifuge intentionnel)
+tl.to('#hour-hand',   { rotation: 720 + 290.5, duration: 1.10, ease: 'expo.out' }, 7.35);
+tl.to('#minute-hand', { rotation: 1440 + 246,  duration: 0.90, ease: 'expo.out' }, 7.48);
 
 // ── CAMÉRA 5 : Whip → Carte navigation ───────────────────────────────
 tl.to('.bento-content', { filter: 'blur(12px)', duration: 0.12, ease: 'power3.in',   overwrite: 'auto' }, 8.80);
 tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.78, ease: 'expo.out',    overwrite: 'auto' }, 8.92);
 tl.to('.bento-content', { scale: S*1.30, x: 377, y: 598, rotation: -3, duration: 0.90, ease: 'power4.inOut', overwrite: 'auto' }, 8.80);
-tl.to('.bento-content', { rotation: 0, duration: 0.30, ease: 'sine.out',  overwrite: 'auto' }, 9.72);
-tl.to('.bento-content', { x: 381, y: 594, duration: 1.0, ease: 'sine.inOut', overwrite: 'auto' }, 10.05);
+tl.to('.bento-content', { rotation: 0, duration: 0.30, ease: 'sine.out', overwrite: 'auto' }, 9.72);
+// Breathe cam 5 : oscillation yoyo (0.85s → 0.40s×2 = 0.80s)
+tl.to('.bento-content', { x: 381, y: 594, duration: 0.40, ease: 'sine.inOut', yoyo: true, repeat: 1, overwrite: 'auto' }, 10.05);
 
-// Map
-tl.to('#map-route', { strokeDashoffset: 0, duration: 2.0, ease: 'power2.out' }, 9.73);
-tl.to('.nav-step',  { scale: 1, duration: 0.38, ease: 'back.out(2.2)', stagger: 0.22 }, 10.22);
-tl.to('.nav-step',  { scale: 1.08, duration: 0.60, ease: 'sine.inOut', yoyo: true, repeat: 6 }, 10.68);
+// Map — démarre pendant la décélération
+tl.to('#map-route', { strokeDashoffset: 0, duration: 2.0, ease: 'power2.out' }, 9.52);
+tl.to('.nav-step',  { scale: 1, duration: 0.38, ease: 'back.out(2.2)', stagger: 0.22 }, 10.08);
+tl.to('.nav-step',  { scale: 1.08, duration: 0.60, ease: 'sine.inOut', yoyo: true, repeat: 6 }, 10.52);
 
 // ── CAMÉRA 6 : Whip → Vol + Appel ────────────────────────────────────
 tl.to('.bento-content', { filter: 'blur(13px)', duration: 0.12, ease: 'power3.in',   overwrite: 'auto' }, 10.90);
 tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.83, ease: 'expo.out',    overwrite: 'auto' }, 11.02);
 tl.to('.bento-content', { scale: S*1.30, x: -364, y: 468, rotation: 2, duration: 0.95, ease: 'power4.inOut', overwrite: 'auto' }, 10.90);
-tl.to('.bento-content', { rotation: 0, duration: 0.30, ease: 'sine.out',  overwrite: 'auto' }, 11.87);
-tl.to('.bento-content', { x: -361, y: 471, duration: 1.0, ease: 'sine.inOut', overwrite: 'auto' }, 12.20);
+tl.to('.bento-content', { rotation: 0, duration: 0.30, ease: 'sine.out', overwrite: 'auto' }, 11.87);
+// Breathe cam 6 : oscillation complète yoyo (1.0s → 0.48s×2 = 0.96s)
+tl.to('.bento-content', { x: -361, y: 471, duration: 0.48, ease: 'sine.inOut', yoyo: true, repeat: 1, overwrite: 'auto' }, 12.20);
 
-// Phone + Flight
-tl.to('.call-name, .call-btns', { filter: 'blur(0px)', duration: 0.60, ease: 'power2.out'      }, 11.88);
-tl.to('#call-btn-decline',      { scale: 1.20, duration: 0.40, ease: 'power3.out', yoyo: true, repeat: 7 }, 11.90);
-tl.to('#call-timer-text',       { opacity: 1, duration: 0.40, ease: 'power2.out'                }, 12.05);
-tl.to('.flight-stop', { x: 0, opacity: 1, duration: 0.50, ease: 'power3.out', stagger: 0.12    }, 11.90);
+// Phone + Flight — démarrent pendant la décélération
+tl.to('.call-name, .call-btns', { filter: 'blur(0px)', duration: 0.55, ease: 'power2.out'      }, 11.67);
+tl.to('#call-btn-decline',      { scale: 1.20, duration: 0.40, ease: 'power3.out', yoyo: true, repeat: 7 }, 11.70);
+tl.to('#call-timer-text',       { opacity: 1, duration: 0.40, ease: 'power2.out'                }, 11.88);
+tl.to('.flight-stop', { x: 0, opacity: 1, duration: 0.48, ease: 'power3.out', stagger: 0.12    }, 11.70);
 
 // ── PULL-BACK FINAL ───────────────────────────────────────────────────
 tl.to('.bento-content', { filter: 'blur(6px)', duration: 0.18, ease: 'power2.in',   overwrite: 'auto' }, 13.20);
