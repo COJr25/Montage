@@ -403,96 +403,97 @@ tl.set('.flight-stop',            { x: -20, opacity: 0 }, 0);
 tl.set('.call-name, .call-btns',  { filter: 'blur(15px)' }, 0);
 tl.set('.bento-content',          { filter: 'blur(0px)' }, 0);
 
-// Second hand tourne depuis t=0 — horloge déjà en vie
+// Second hand tourne depuis t=0
 tl.to('#second-hand', { rotation: 360, duration: 1.0, ease: 'linear', repeat: 14 }, 0);
 
 // ── VIGNETTE + ZOOM-OUT ───────────────────────────────────────────────
 tl.to('#bg-vignette',   { opacity: 0.35, duration: 5.0, ease: 'power2.out' }, 0);
 tl.to('.bento-content', { scale: S*1.80, duration: 1.40, ease: 'expo.out'  }, 0);
 
-// Widget entries — timing irrégulier intentionnel
-tl.to('#c-calendar', { y: 0, duration: 0.65, ease: 'back.out(1.4)'       }, 0.05);
-tl.to('#c-battery',  { y: 0, duration: 0.55, ease: 'expo.out'            }, 0.48);
-tl.to('#c-clock',    { opacity: 1, duration: 0.45, ease: 'power2.out'    }, 0.82);
-tl.to('#c-mercedes', { opacity: 1, duration: 0.35, ease: 'power3.out'    }, 0.91);
-tl.to('#c-map',      { clipPath: 'inset(0%)', duration: 0.70, ease: 'expo.out' }, 1.12);
-tl.to('#c-call',     { y: 0, opacity: 1, duration: 0.55, ease: 'back.out(2.2)' }, 1.48);
-tl.to('#c-flight',   { x: 0, opacity: 1, duration: 0.50, ease: 'expo.out'  }, 1.60);
+// Widget entries — apparition décalée intentionnelle
+tl.to('#c-calendar', { y: 0, duration: 0.65, ease: 'back.out(1.4)'        }, 0.05);
+tl.to('#c-battery',  { y: 0, duration: 0.70, ease: 'power3.out'           }, 0.48);
+tl.to('#c-clock',    { opacity: 1, duration: 0.60, ease: 'power2.out'     }, 0.82);
+tl.to('#c-mercedes', { opacity: 1, duration: 0.60, ease: 'power2.out'     }, 0.98);
+tl.to('#c-map',      { clipPath: 'inset(0%)', duration: 0.80, ease: 'power3.out' }, 1.12);
+tl.to('#c-call',     { y: 0, opacity: 1, duration: 0.60, ease: 'back.out(1.8)' }, 1.48);
+tl.to('#c-flight',   { x: 0, opacity: 1, duration: 0.60, ease: 'power3.out'   }, 1.62);
 
 // ── CAMÉRA 1 : Whip → Calendrier ──────────────────────────────────────
-tl.to('.bento-content', { filter: 'blur(12px)', duration: 0.12, ease: 'power3.in',  overwrite: 'auto' }, 1.40);
-tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.68, ease: 'expo.out',   overwrite: 'auto' }, 1.52);
-tl.to('.bento-content', { scale: S*1.40, x: -378, y: -644, rotation: 1, duration: 0.80, ease: 'expo.out', overwrite: 'auto' }, 1.40);
-tl.to('.bento-content', { rotation: 0, duration: 0.28, ease: 'sine.out', overwrite: 'auto' }, 2.20);
-tl.to('.bento-content', { x: -374, y: -647, duration: 0.90, ease: 'sine.inOut',    overwrite: 'auto' }, 2.30);
+// power4.inOut : accélération → pic → freinage (physique réelle, pas snap numérique)
+tl.to('.bento-content', { filter: 'blur(12px)', duration: 0.12, ease: 'power3.in',   overwrite: 'auto' }, 1.40);
+tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.78, ease: 'expo.out',    overwrite: 'auto' }, 1.52);
+tl.to('.bento-content', { scale: S*1.40, x: -378, y: -644, rotation: 1, duration: 0.90, ease: 'power4.inOut', overwrite: 'auto' }, 1.40);
+tl.to('.bento-content', { rotation: 0, duration: 0.28, ease: 'sine.out',  overwrite: 'auto' }, 2.32);
+tl.to('.bento-content', { x: -374, y: -647, duration: 0.90, ease: 'sine.inOut', overwrite: 'auto' }, 2.65);
 
 // Calendrier
-tl.to('.cal-header', { opacity: 1, duration: 0.40, ease: 'power2.out' }, 2.18);
-tl.to('.cal-day', { scale: 1, duration: 0.55, ease: 'back.out(2.0)', stagger: { each: 0.022, from: 'center' } }, 2.22);
-tl.to(['.cal-day.lime', '.cal-day.lime-outline'], { scale: 1.1, duration: 0.28, ease: 'back.out(2.5)', stagger: 0.04 }, 2.44);
+tl.to('.cal-header', { opacity: 1, duration: 0.45, ease: 'power2.out' }, 2.33);
+tl.to('.cal-day', { scale: 1, duration: 0.60, ease: 'back.out(1.8)', stagger: { each: 0.022, from: 'center' } }, 2.37);
+tl.to(['.cal-day.lime', '.cal-day.lime-outline'], { scale: 1.1, duration: 0.30, ease: 'back.out(2.0)', stagger: 0.04 }, 2.58);
 
 // ── CAMÉRA 2 : Whip → Batterie ───────────────────────────────────────
-tl.to('.bento-content', { filter: 'blur(14px)', duration: 0.12, ease: 'power3.in',  overwrite: 'auto' }, 3.10);
-tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.63, ease: 'expo.out',   overwrite: 'auto' }, 3.22);
-tl.to('.bento-content', { scale: S*1.45, x: 377, y: -711, rotation: -2, duration: 0.75, ease: 'expo.out', overwrite: 'auto' }, 3.10);
-tl.to('.bento-content', { rotation: 0, duration: 0.26, ease: 'sine.out', overwrite: 'auto' }, 3.85);
-tl.to('.bento-content', { x: 380, y: -715, duration: 0.82, ease: 'sine.inOut',     overwrite: 'auto' }, 3.95);
+tl.to('.bento-content', { filter: 'blur(14px)', duration: 0.12, ease: 'power3.in',   overwrite: 'auto' }, 3.10);
+tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.73, ease: 'expo.out',    overwrite: 'auto' }, 3.22);
+tl.to('.bento-content', { scale: S*1.45, x: 377, y: -711, rotation: -2, duration: 0.85, ease: 'power4.inOut', overwrite: 'auto' }, 3.10);
+tl.to('.bento-content', { rotation: 0, duration: 0.26, ease: 'sine.out',  overwrite: 'auto' }, 3.97);
+tl.to('.bento-content', { x: 380, y: -715, duration: 0.82, ease: 'sine.inOut', overwrite: 'auto' }, 4.30);
 
-// Batterie — elastic bounce sur les barres
-tl.to('#battery-bolt',   { scale: 1.15, duration: 0.65, ease: 'sine.inOut', yoyo: true, repeat: 16 }, 3.83);
-tl.to('.battery-bar.on', { scaleY: 1, duration: 0.55, ease: 'elastic.out(1, 0.5)', stagger: { each: 0.06, from: 'end' } }, 3.92);
+// Batterie
+tl.to('#battery-bolt',   { scale: 1.15, duration: 0.65, ease: 'sine.inOut', yoyo: true, repeat: 16 }, 3.98);
+tl.to('.battery-bar.on', { scaleY: 1, duration: 0.55, ease: 'elastic.out(1, 0.5)', stagger: { each: 0.06, from: 'end' } }, 4.08);
 
 // ── CAMÉRA 3 : Whip → Pan haut ───────────────────────────────────────
-tl.to('.bento-content', { filter: 'blur(10px)', duration: 0.12, ease: 'power3.in',  overwrite: 'auto' }, 4.80);
-tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.58, ease: 'expo.out',   overwrite: 'auto' }, 4.92);
-tl.to('.bento-content', { scale: S*1.60, x: 416, y: -304, duration: 0.70, ease: 'expo.out', overwrite: 'auto' }, 4.80);
+tl.to('.bento-content', { filter: 'blur(10px)', duration: 0.12, ease: 'power3.in',   overwrite: 'auto' }, 4.80);
+tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.68, ease: 'expo.out',    overwrite: 'auto' }, 4.92);
+tl.to('.bento-content', { scale: S*1.60, x: 416, y: -304, duration: 0.80, ease: 'power4.inOut', overwrite: 'auto' }, 4.80);
 
 // ── CAMÉRA 4 : Whip → Mercedes + Horloge ─────────────────────────────
-tl.to('.bento-content', { filter: 'blur(13px)', duration: 0.12, ease: 'power3.in',  overwrite: 'auto' }, 6.50);
-tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.73, ease: 'expo.out',   overwrite: 'auto' }, 6.62);
-tl.to('.bento-content', { scale: S*1.20, x: 0, y: 72, rotation: 1.5, duration: 0.85, ease: 'expo.out', overwrite: 'auto' }, 6.50);
-tl.to('.bento-content', { rotation: 0, duration: 0.30, ease: 'sine.out', overwrite: 'auto' }, 7.35);
-tl.to('.bento-content', { x: 3, y: 70, duration: 1.10, ease: 'sine.inOut',         overwrite: 'auto' }, 7.48);
+tl.to('.bento-content', { filter: 'blur(13px)', duration: 0.12, ease: 'power3.in',   overwrite: 'auto' }, 6.50);
+tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.83, ease: 'expo.out',    overwrite: 'auto' }, 6.62);
+tl.to('.bento-content', { scale: S*1.20, x: 0, y: 72, rotation: 1.5, duration: 0.95, ease: 'power4.inOut', overwrite: 'auto' }, 6.50);
+tl.to('.bento-content', { rotation: 0, duration: 0.30, ease: 'sine.out',  overwrite: 'auto' }, 7.47);
+tl.to('.bento-content', { x: 3, y: 70, duration: 1.10, ease: 'sine.inOut', overwrite: 'auto' }, 7.80);
 
 // Mercedes
-tl.to('#car-image',              { x: 0, opacity: 1, duration: 1.20, ease: 'expo.out'              }, 7.38);
-tl.to('.mercedes-bar-fill',      { scaleX: 1, background: '#92FE01', duration: 1.50, ease: 'power4.out' }, 7.55);
-tl.to('.mercedes-glow',          { opacity: 1, duration: 0.90, ease: 'sine.inOut'                   }, 7.80);
-tl.to('.mercedes-glass-reflect', { x: '600%',  duration: 0.60, ease: 'power3.inOut'                 }, 8.05);
+tl.to('#car-image',              { x: 0, opacity: 1, duration: 1.20, ease: 'power3.out'             }, 7.52);
+tl.to('.mercedes-bar-fill',      { scaleX: 1, background: '#92FE01', duration: 1.50, ease: 'power4.out' }, 7.65);
+tl.to('.mercedes-glow',          { opacity: 1, duration: 0.90, ease: 'sine.inOut'                   }, 7.90);
+tl.to('.mercedes-glass-reflect', { x: '600%',  duration: 0.60, ease: 'power3.inOut'                 }, 8.15);
 
-// Horloge — turbine : 2 tours + position finale
-tl.to('#hour-hand',   { rotation: 720 + 290.5, duration: 1.10, ease: 'expo.out' }, 7.50);
-tl.to('#minute-hand', { rotation: 1440 + 246,  duration: 0.90, ease: 'expo.out' }, 7.65);
+// Horloge — turbine : expo.out conservé (effet centrifuge intentionnel)
+tl.to('#hour-hand',   { rotation: 720 + 290.5, duration: 1.10, ease: 'expo.out' }, 7.55);
+tl.to('#minute-hand', { rotation: 1440 + 246,  duration: 0.90, ease: 'expo.out' }, 7.70);
 
 // ── CAMÉRA 5 : Whip → Carte navigation ───────────────────────────────
-tl.to('.bento-content', { filter: 'blur(12px)', duration: 0.12, ease: 'power3.in',  overwrite: 'auto' }, 8.80);
-tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.68, ease: 'expo.out',   overwrite: 'auto' }, 8.92);
-tl.to('.bento-content', { scale: S*1.30, x: 377, y: 598, rotation: -3, duration: 0.80, ease: 'expo.out', overwrite: 'auto' }, 8.80);
-tl.to('.bento-content', { rotation: 0, duration: 0.30, ease: 'sine.out', overwrite: 'auto' }, 9.60);
-tl.to('.bento-content', { x: 381, y: 594, duration: 1.0, ease: 'sine.inOut',       overwrite: 'auto' }, 9.72);
+tl.to('.bento-content', { filter: 'blur(12px)', duration: 0.12, ease: 'power3.in',   overwrite: 'auto' }, 8.80);
+tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.78, ease: 'expo.out',    overwrite: 'auto' }, 8.92);
+tl.to('.bento-content', { scale: S*1.30, x: 377, y: 598, rotation: -3, duration: 0.90, ease: 'power4.inOut', overwrite: 'auto' }, 8.80);
+tl.to('.bento-content', { rotation: 0, duration: 0.30, ease: 'sine.out',  overwrite: 'auto' }, 9.72);
+tl.to('.bento-content', { x: 381, y: 594, duration: 1.0, ease: 'sine.inOut', overwrite: 'auto' }, 10.05);
 
 // Map
-tl.to('#map-route', { strokeDashoffset: 0, duration: 2.0, ease: 'power2.out' }, 9.62);
-tl.to('.nav-step',  { scale: 1, duration: 0.38, ease: 'back.out(2.2)', stagger: 0.22 }, 10.10);
-tl.to('.nav-step',  { scale: 1.08, duration: 0.60, ease: 'sine.inOut', yoyo: true, repeat: 6 }, 10.58);
+tl.to('#map-route', { strokeDashoffset: 0, duration: 2.0, ease: 'power2.out' }, 9.73);
+tl.to('.nav-step',  { scale: 1, duration: 0.38, ease: 'back.out(2.2)', stagger: 0.22 }, 10.22);
+tl.to('.nav-step',  { scale: 1.08, duration: 0.60, ease: 'sine.inOut', yoyo: true, repeat: 6 }, 10.68);
 
 // ── CAMÉRA 6 : Whip → Vol + Appel ────────────────────────────────────
-tl.to('.bento-content', { filter: 'blur(13px)', duration: 0.12, ease: 'power3.in',  overwrite: 'auto' }, 10.90);
-tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.73, ease: 'expo.out',   overwrite: 'auto' }, 11.02);
-tl.to('.bento-content', { scale: S*1.30, x: -364, y: 468, rotation: 2, duration: 0.85, ease: 'expo.out', overwrite: 'auto' }, 10.90);
-tl.to('.bento-content', { rotation: 0, duration: 0.30, ease: 'sine.out', overwrite: 'auto' }, 11.75);
-tl.to('.bento-content', { x: -361, y: 471, duration: 1.0, ease: 'sine.inOut',      overwrite: 'auto' }, 11.88);
+tl.to('.bento-content', { filter: 'blur(13px)', duration: 0.12, ease: 'power3.in',   overwrite: 'auto' }, 10.90);
+tl.to('.bento-content', { filter: 'blur(0px)',  duration: 0.83, ease: 'expo.out',    overwrite: 'auto' }, 11.02);
+tl.to('.bento-content', { scale: S*1.30, x: -364, y: 468, rotation: 2, duration: 0.95, ease: 'power4.inOut', overwrite: 'auto' }, 10.90);
+tl.to('.bento-content', { rotation: 0, duration: 0.30, ease: 'sine.out',  overwrite: 'auto' }, 11.87);
+tl.to('.bento-content', { x: -361, y: 471, duration: 1.0, ease: 'sine.inOut', overwrite: 'auto' }, 12.20);
 
 // Phone + Flight
-tl.to('.call-name, .call-btns', { filter: 'blur(0px)', duration: 0.55, ease: 'power2.out'      }, 11.77);
-tl.to('#call-btn-decline',      { scale: 1.20, duration: 0.40, ease: 'power3.out', yoyo: true, repeat: 7 }, 11.80);
-tl.to('#call-timer-text',       { opacity: 1, duration: 0.35, ease: 'power2.out'                }, 11.92);
-tl.to('.flight-stop', { x: 0, opacity: 1, duration: 0.45, ease: 'power3.out', stagger: 0.12    }, 11.80);
+tl.to('.call-name, .call-btns', { filter: 'blur(0px)', duration: 0.60, ease: 'power2.out'      }, 11.88);
+tl.to('#call-btn-decline',      { scale: 1.20, duration: 0.40, ease: 'power3.out', yoyo: true, repeat: 7 }, 11.90);
+tl.to('#call-timer-text',       { opacity: 1, duration: 0.40, ease: 'power2.out'                }, 12.05);
+tl.to('.flight-stop', { x: 0, opacity: 1, duration: 0.50, ease: 'power3.out', stagger: 0.12    }, 11.90);
 
 // ── PULL-BACK FINAL ───────────────────────────────────────────────────
-tl.to('.bento-content', { filter: 'blur(6px)', duration: 0.18, ease: 'power2.in',  overwrite: 'auto' }, 13.20);
-tl.to('.bento-content', { filter: 'blur(0px)', duration: 1.60, ease: 'expo.out',   overwrite: 'auto' }, 13.38);
-tl.to('.bento-content', { scale: S, x: 0, y: 0, rotation: 0, duration: 1.80, ease: 'expo.out', overwrite: 'auto' }, 13.20);
+tl.to('.bento-content', { filter: 'blur(6px)', duration: 0.18, ease: 'power2.in',   overwrite: 'auto' }, 13.20);
+tl.to('.bento-content', { filter: 'blur(0px)', duration: 1.82, ease: 'expo.out',    overwrite: 'auto' }, 13.38);
+tl.to('.bento-content', { scale: S, x: 0, y: 0, rotation: 0, duration: 2.00, ease: 'power2.inOut', overwrite: 'auto' }, 13.20);
 
 // ── FLASH + SIGNATURE ─────────────────────────────────────────────────
 tl.to('#flash-overlay', { opacity: 1, duration: 0.50, ease: 'power2.in'  }, 14.80);
